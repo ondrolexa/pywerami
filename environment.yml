@@ -1,0 +1,9 @@
+name: pywerami
+channels:
+  - ondrolexa
+  - defaults
+dependencies:
+  - python=3
+  - numpy
+  - matplotlib
+  - scipy
