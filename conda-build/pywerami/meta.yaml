@@ -31,7 +31,7 @@ requirements:
 
   run:
     - python
-    - pyqt = 5
+    - pyqt >=5
     - numpy >=1.8
     - matplotlib >=1.2
     - scipy
