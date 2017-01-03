@@ -88,7 +88,6 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.matplot.addWidget(self.mpl_toolbar)
         self.setWindowTitle('PyWerami')
         window_icon = resource_filename(__name__, 'images/pywerami.png')
-        print(window_icon)
         self.setWindowIcon(QtGui.QIcon(window_icon))
 
         #set combos
