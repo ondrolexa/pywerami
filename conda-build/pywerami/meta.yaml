@@ -1,12 +1,12 @@
 {% set data = load_setup_py_data() %}
 
 package:
-  name: apsg
+  name: pywerami
   version: {{ data.get('version') }}
 
 source:
   git_url: https://github.com/ondrolexa/pywerami.git
-  git_rev: v{{ data.get('version') }}
+  git_rev: {{ 'v' + data.get('version') }}
 #  patches:
    # List any patch files here
    # - fix.patch
