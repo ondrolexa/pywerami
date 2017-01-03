@@ -12,30 +12,32 @@ import argparse
 
 from pkg_resources import resource_filename
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import numpy as np
 import matplotlib
 from scipy import ndimage
 
 # Make sure that we are using QT5
-matplotlib.use('Qt4Agg')
+matplotlib.use('Qt5Agg')
 
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib import cm
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas,
+    NavigationToolbar2QT as NavigationToolbar)
 from mpl_toolkits.mplot3d import Axes3D
 
 from .ui_pywerami import Ui_MainWindow
 from .api import WeramiData
 
-class OptionsForm(QtGui.QDialog):
+class OptionsForm(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(OptionsForm, self).__init__(parent)
         settings = QtCore.QSettings("LX", "pywerami")
-        layout = QtGui.QVBoxLayout(self)
-        form = QtGui.QWidget()
-        formlayout = QtGui.QFormLayout(form)
+        layout = QtWidgets.QVBoxLayout(self)
+        form = QtWidgets.QWidget()
+        formlayout = QtWidgets.QFormLayout(form)
         
         ## scale
         #self.scale = QLineEdit(repr(settings.value("scale", 1, type=float)), self)
@@ -43,17 +45,17 @@ class OptionsForm(QtGui.QDialog):
         #formlayout.addRow('Scale', self.scale)
         
         # not-a-number
-        self.nan = QtGui.QLineEdit(settings.value("nan", "NaN", type=str), self)
+        self.nan = QtWidgets.QLineEdit(settings.value("nan", "NaN", type=str), self)
         formlayout.addRow('Not a number', self.nan)
 
         form.setLayout(formlayout)
-        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         layout.addWidget(form)
         layout.addWidget(buttonBox)
         self.setLayout(layout)
 
-        self.connect(buttonBox, QtCore.SIGNAL("accepted()"), self.check)
-        self.connect(buttonBox, QtCore.SIGNAL("rejected()"), self.reject)
+        buttonBox.accepted.connect(self.check)
+        buttonBox.rejected.connect(self.reject)
 
         self.setWindowTitle("PyWerami options")
 
@@ -62,21 +64,21 @@ class OptionsForm(QtGui.QDialog):
             np.float(self.nan.text())
             self.accept()
         except:
-            QtGui.QMessageBox.warning(self, "Warning", "Not a number must be float number or NaN")
+            QtWidgets.QMessageBox.warning(self, "Warning", "Not a number must be float number or NaN")
 
     def accept(self):
         settings = QtCore.QSettings("LX", "pywerami")
         #settings.setValue("scale", float(self.scale.text()))
         settings.setValue("nan", self.nan.text())
-        QtGui.QDialog.accept(self)
+        QtWidgets.QDialog.accept(self)
 
-class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
+class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self, filename=None, parent=None):
         super(PyWeramiWindow,self).__init__(parent)
         self.settings = QtCore.QSettings("LX", "pywerami")
         self.setupUi(self)
-        self._fig = plt.figure(facecolor="white")
+        self._fig = Figure(facecolor="white")
         self._ax = self._fig.add_subplot(111)
 
         self._canvas = FigureCanvas(self._fig)
@@ -91,7 +93,7 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setWindowIcon(QtGui.QIcon(window_icon))
 
         #set combos
-        self.cmaps = [m for m in plt.cm.datad if not m.endswith("_r")]
+        self.cmaps = [m for m in cm.datad if not m.endswith("_r")]
         self.mapstyle.addItems(self.cmaps)
 
         # set validators
@@ -134,15 +136,15 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Ready", 5000)
 
     def closeEvent(self,event):
-        reply=QtGui.QMessageBox.question(self,'Message',"Are you sure to quit?",QtGui.QMessageBox.Yes,QtGui.QMessageBox.No)
-        if reply==QtGui.QMessageBox.Yes:
+        reply=QtWidgets.QMessageBox.question(self,'Message',"Are you sure to quit?",QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+        if reply==QtWidgets.QMessageBox.Yes:
             event.accept()
         else:
             event.ignore()
 
     def import_data(self, filename=None):
         if not filename:
-            filename = QtGui.QFileDialog.getOpenFileName(self, "Import tab file", ".", "TAB (*.tab);;All files (*.*)")
+            filename = QtWidgets.QFileDialog.getOpenFileName(self, "Import tab file", ".", "TAB (*.tab);;All files (*.*)")[0]
         if filename:
             self.data = WeramiData.from_tab(filename)
 
@@ -162,8 +164,8 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.varSel.selectionChanged.connect(self.on_var_changed)
             self._model.itemChanged.connect(self.plot)
             # buttons signals
-            self.buttonBox.button(QtGui.QDialogButtonBox.Apply).clicked.connect(self.apply_props)
-            self.buttonBox.button(QtGui.QDialogButtonBox.RestoreDefaults).clicked.connect(self.restore_props)
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.apply_props)
+            self.buttonBox.button(QtWidgets.QDialogButtonBox.RestoreDefaults).clicked.connect(self.restore_props)
             self.contcolor.clicked.connect(self.contours_color)
             self.action3D.triggered.connect(self.switch3d)
             # signals to calculate step size
@@ -174,7 +176,7 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
             
             # all done focus
             self.action3D.setChecked(False) # no 3d on import
-            self.varSel.setCurrentIndex(self._model.index(0, 0), QtGui.QItemSelectionModel.ClearAndSelect | QtGui.QItemSelectionModel.Rows)
+            self.varSel.setCurrentIndex(self._model.index(0, 0), QtCore.QItemSelectionModel.ClearAndSelect | QtCore.QItemSelectionModel.Rows)
             self.listView.setFocus()
             self.plot()
             self.statusbar.showMessage("Data from {} imported".format(self.data.label), 5000)
@@ -319,7 +321,7 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mpl_toolbar.zoom()
 
     def plotgrid(self):
-        plt.grid()
+        self._ax.grid()
         self._canvas.draw()
 
     def switch3d(self):
@@ -350,7 +352,7 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
                         data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[var]['gauss']*self.props[var]['resample']), mask=data.mask)
                     data = np.ma.masked_outside(data, self.props[var]['clipmin'], self.props[var]['clipmax'])
                     if self.props[var]['fill']:
-                        self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=plt.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity']/100.0)
+                        self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=cm.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity']/100.0)
                     if self.props[var]['type'] == 'linear':
                         if self.props[var]['levels'] == 'num':
                             clevels = np.linspace(self.props[var]['min'], self.props[var]['max'], self.props[var]['num'])
@@ -368,7 +370,7 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
                         cdfx = np.cumsum(np.diff(bin_edges)) + bin_edges[:2].sum()/2
                         clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
                     if self.props[var]['contours'] == 'map':
-                        CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, cmap=plt.get_cmap(self.props[var]['cmap']))
+                        CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, cmap=cm.get_cmap(self.props[var]['cmap']))
                     elif self.props[var]['contours'] == 'color':
                         CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, colors=self.props[var]['color'])
                     if self.props[var]['label'] and CS:
@@ -376,7 +378,7 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
                 i += 1
 
             self._ax.axis(extent)
-            plt.title(self.data.label)
+            self._ax.set_title(self.data.label)
         else:
             # get data, smooth and clip
             data = self.data.get_var(self.var)
@@ -388,12 +390,12 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
                 data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[self.var]['gauss']*self.props[self.var]['resample']), mask=data.mask)
             data = np.ma.masked_outside(data, self.props[self.var]['clipmin'], self.props[self.var]['clipmax'])
             x,y = np.meshgrid(self.data.get_xrange(self.props[self.var]['resample']), self.data.get_yrange(self.props[self.var]['resample']))
-            self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=plt.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity']/100.0)
+            self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity']/100.0)
             self._ax.view_init(azim=235, elev=30)
 
-        plt.xlabel(self.data.ind[self.data.xvar]['name'])
-        plt.ylabel(self.data.ind[self.data.yvar]['name'])
-        plt.tight_layout()
+        self._ax.set_xlabel(self.data.ind[self.data.xvar]['name'])
+        self._ax.set_ylabel(self.data.ind[self.data.yvar]['name'])
+        self._fig.tight_layout()
         self._canvas.draw()
 
 
@@ -406,7 +408,7 @@ def process_cl_args():
 
 def main():
     parsed_args, unparsed_args = process_cl_args()
-    app = QtGui.QApplication(unparsed_args)
+    app = QtWidgets.QApplication(unparsed_args)
     MainWindow = PyWeramiWindow(parsed_args.filename)
     MainWindow.show()
     sys.exit(app.exec_())
