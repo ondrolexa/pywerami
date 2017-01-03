@@ -7,3 +7,8 @@ History
 ---------------------
 
 * First release on PyPI.
+
+0.2.0 (2017-01-03)
+---------------------
+
+* Setup and conda fixes.

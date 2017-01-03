@@ -4,7 +4,8 @@ include HISTORY.rst
 include LICENSE
 include README.rst
 
-recursive-include samples *
+recursive-include pywerami/samples *
+recursive-include pywerami/images *
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

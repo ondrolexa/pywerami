@@ -29,8 +29,8 @@ setup(
     author_email='lexa.ondrej@gmail.com',
     url='https://github.com/ondrolexa/pywerami',
     packages=find_packages(),
-    package_data={'pywerami': ['pywerami.png']},
-    data_files=[('samples', ['samples/in17a_1.tab', 'samples/luca3_1.tab'])],
+    package_data={'pywerami.images': ['*.png'],
+                  'pywerami.samples': ['*.tab']},
     install_requires=requirements,
     entry_points={
     'console_scripts': [
