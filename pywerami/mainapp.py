@@ -10,10 +10,16 @@ http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 import sys
 import argparse
 
+from pkg_resources import resource_filename
+
 from PyQt4 import QtCore, QtGui
 
 import numpy as np
+import matplotlib
 from scipy import ndimage
+
+# Make sure that we are using QT5
+matplotlib.use('Qt4Agg')
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -80,6 +86,9 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mpl_toolbar = NavigationToolbar(self._canvas,self.widget)
         self.mpl_toolbar.hide()
         self.matplot.addWidget(self.mpl_toolbar)
+        self.setWindowTitle('PyWerami')
+        window_icon = resource_filename(__name__, 'pywerami.png')
+        self.setWindowIcon(QtGui.QIcon(window_icon))
 
         #set combos
         self.cmaps = [m for m in plt.cm.datad if not m.endswith("_r")]
@@ -386,4 +395,22 @@ class PyWeramiWindow(QtGui.QMainWindow, Ui_MainWindow):
         plt.ylabel(self.data.ind[self.data.yvar]['name'])
         plt.tight_layout()
         self._canvas.draw()
+
+
+def process_cl_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename', action='store', nargs='?', default=None, help="Werami tab file")
+
+    parsed_args, unparsed_args = parser.parse_known_args()
+    return parsed_args, unparsed_args
+
+def main():
+    parsed_args, unparsed_args = process_cl_args()
+    app = QtGui.QApplication(unparsed_args)
+    MainWindow = PyWeramiWindow(parsed_args.filename)
+    MainWindow.show()
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    main()
 
