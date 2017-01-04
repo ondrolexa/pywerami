@@ -182,7 +182,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage("Data from {} imported".format(self.data.label), 5000)
 
     def contours_color(self):
-    	col = QtGui.QColorDialog.getColor()
+    	col = QtWidgets.QColorDialog.getColor()
     	if col.isValid():
             self.contcolor.setStyleSheet("background-color: {}".format(col.name()))
 
