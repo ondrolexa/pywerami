@@ -17,19 +17,3 @@ pywerami is a stand-alone program to make an countour/3D plot from a contour dat
 
 * Free software: ISC license
 * Documentation: https://pywerami.readthedocs.org.
-
-Features
---------
-
-* TODO
-
-Credits
----------
-
-Tools used in rendering this package:
-
-*  Cookiecutter_
-*  `cookiecutter-pypackage`_
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
