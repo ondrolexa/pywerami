@@ -12,4 +12,10 @@ History
 ----------------
 
 * Setup and conda fixes
-* PyQt5 required
+* Changed to PyQt5
+
+0.2.2 (2017-01-13)
+------------------
+
+* Minimum number of levels is 2
+* For single contour set Minimum and Maximum to same value

@@ -38,12 +38,12 @@ class OptionsForm(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout(self)
         form = QtWidgets.QWidget()
         formlayout = QtWidgets.QFormLayout(form)
-        
+
         ## scale
         #self.scale = QLineEdit(repr(settings.value("scale", 1, type=float)), self)
         #self.scale.setValidator(QDoubleValidator(self.scale))
         #formlayout.addRow('Scale', self.scale)
-        
+
         # not-a-number
         self.nan = QtWidgets.QLineEdit(settings.value("nan", "NaN", type=str), self)
         formlayout.addRow('Not a number', self.nan)
@@ -99,11 +99,11 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # set validators
         self.levelmin.setValidator(QtGui.QDoubleValidator(self.levelmin))
         self.levelmax.setValidator(QtGui.QDoubleValidator(self.levelmax))
-        self.levelnum.setValidator(QtGui.QIntValidator(self.levelmin))
+        self.levelnum.setValidator(QtGui.QIntValidator(self.levelnum))
         self.levelstep.setValidator(QtGui.QDoubleValidator(self.levelstep))
         self.clipmin.setValidator(QtGui.QDoubleValidator(self.clipmin))
         self.clipmax.setValidator(QtGui.QDoubleValidator(self.clipmax))
-        
+
         # Set icons in toolbar
         self.actionOpen.setIcon(QtGui.QIcon.fromTheme('document-open'))
         self.actionSave.setIcon(QtGui.QIcon.fromTheme('document-save'))
@@ -119,7 +119,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionProperties.setIcon(QtGui.QIcon.fromTheme('preferences-other'))
         self.actionQuit.setIcon(QtGui.QIcon.fromTheme('application-exit'))
         self.actionAbout.setIcon(QtGui.QIcon.fromTheme('help-about'))
-        
+
         self.actionImport.triggered.connect(self.import_data)
         self.actionHome.triggered.connect(self.mpl_toolbar.home)
         self.actionPan.triggered.connect(self.plotpan)
@@ -131,7 +131,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionQuit.triggered.connect(self.close)
         if filename:
             self.import_data(filename)
-        
+
         # ready
         self.statusbar.showMessage("Ready", 5000)
 
@@ -173,7 +173,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.levelmax.editingFinished.connect(self.step_from_levels)
             self.levelnum.editingFinished.connect(self.step_from_levels)
             self.setlevels.toggled.connect(self.step_from_levels)
-            
+
             # all done focus
             self.action3D.setChecked(False) # no 3d on import
             self.varSel.setCurrentIndex(self._model.index(0, 0), QtCore.QItemSelectionModel.ClearAndSelect | QtCore.QItemSelectionModel.Rows)
@@ -187,6 +187,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.contcolor.setStyleSheet("background-color: {}".format(col.name()))
 
     def step_from_levels(self):
+        if int(self.levelnum.text()) < 2:
+            self.levelnum.setText('2')
+        if float(self.levelmax.text()) < float(self.levelmin.text()):
+            self.levelmin.setText(self.levelmax.text())
         if self.setlevels.isChecked():
             step = (float(self.levelmax.text()) - float(self.levelmin.text())) / (int(self.levelnum.text()) - 1)
             self.levelstep.setText(repr(step))
@@ -353,22 +357,25 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     data = np.ma.masked_outside(data, self.props[var]['clipmin'], self.props[var]['clipmax'])
                     if self.props[var]['fill']:
                         self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=cm.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity']/100.0)
-                    if self.props[var]['type'] == 'linear':
-                        if self.props[var]['levels'] == 'num':
-                            clevels = np.linspace(self.props[var]['min'], self.props[var]['max'], self.props[var]['num'])
-                        else:
-                            # trick to include max in levels
-                            clevels = np.arange(self.props[var]['min'], self.props[var]['max'] + 10**np.ceil(np.log10(np.abs(self.props[var]['max']))), self.props[var]['step'])
+                    if self.props[var]['min'] == self.props[var]['max']:
+                        clevels = np.array([self.props[var]['min']])
                     else:
-                        # cdf based on histogram binned acording to the Freedman-Diaconis rule
-                        v = np.sort(data.compressed())
-                        IQR = v[int(round((v.size-1) * float(0.75)))] - v[int(round((v.size-1) * float(0.25)))]
-                        bin_size = 2 * IQR * v.size**(-1.0/3)
-                        nbins = int(round(max(self.props[var]['num'], (v[-1]-v[0]) / (bin_size+0.001))))
-                        hist, bin_edges = np.histogram(v, bins=nbins)
-                        cdf = np.cumsum(hist)
-                        cdfx = np.cumsum(np.diff(bin_edges)) + bin_edges[:2].sum()/2
-                        clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
+                        if self.props[var]['type'] == 'linear':
+                            if self.props[var]['levels'] == 'num':
+                                clevels = np.linspace(self.props[var]['min'], self.props[var]['max'], self.props[var]['num'])
+                            else:
+                                # trick to include max in levels
+                                clevels = np.arange(self.props[var]['min'], self.props[var]['max'] + 10**np.ceil(np.log10(np.abs(self.props[var]['max']))), self.props[var]['step'])
+                        else:
+                            # cdf based on histogram binned acording to the Freedman-Diaconis rule
+                            v = np.sort(data.compressed())
+                            IQR = v[int(round((v.size-1) * float(0.75)))] - v[int(round((v.size-1) * float(0.25)))]
+                            bin_size = 2 * IQR * v.size**(-1.0/3)
+                            nbins = int(round(max(self.props[var]['num'], (v[-1]-v[0]) / (bin_size+0.001))))
+                            hist, bin_edges = np.histogram(v, bins=nbins)
+                            cdf = np.cumsum(hist)
+                            cdfx = np.cumsum(np.diff(bin_edges)) + bin_edges[:2].sum()/2
+                            clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
                     if self.props[var]['contours'] == 'map':
                         CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, cmap=cm.get_cmap(self.props[var]['cmap']))
                     elif self.props[var]['contours'] == 'color':
