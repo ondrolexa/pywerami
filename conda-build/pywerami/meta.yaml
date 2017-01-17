@@ -9,8 +9,6 @@ source:
   git_rev: {{ 'v' + data.get('version') }}
 
 build:
-  # noarch_python: True
-  # preserve_egg_dir: True
   entry_points:
     - pywerami=pywerami.mainapp:main
 
@@ -22,6 +20,7 @@ requirements:
   build:
     - python
     - setuptools
+    - pyqt >=5
     - numpy >=1.8
     - matplotlib >=1.2
     - scipy
@@ -38,9 +37,6 @@ test:
   imports:
     - pywerami
 
-build:
-  script: python setup.py install
-
 about:
   home: http://ondrolexa.github.io/pywerami
   license: BSD License
@@ -49,6 +45,3 @@ about:
   doc_url: https://pywerami.readthedocs.org
   dev_url: https://github.com/ondrolexa/pywerami
 
-# See
-# http://docs.continuum.io/conda/build.html for
-# more information about meta.yaml
