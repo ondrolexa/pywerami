@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>818</width>
-    <height>559</height>
+    <width>754</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,9 +64,18 @@
            <attribute name="title">
             <string>Levels</string>
            </attribute>
-           <layout class="QFormLayout" name="formLayout">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           <layout class="QGridLayout" name="gridLayout">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>9</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>9</number>
             </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_4">
@@ -146,9 +155,18 @@
            <attribute name="title">
             <string>Style</string>
            </attribute>
-           <layout class="QFormLayout" name="formLayout_2">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>9</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>9</number>
             </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label">
@@ -191,6 +209,13 @@
              <widget class="QCheckBox" name="fillstyle">
               <property name="text">
                <string>Filled contours</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QCheckBox" name="contlabel">
+              <property name="text">
+               <string>Labeling</string>
               </property>
              </widget>
             </item>
@@ -243,22 +268,24 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="contlabel">
-              <property name="text">
-               <string>Labeling</string>
-              </property>
-             </widget>
-            </item>
            </layout>
           </widget>
           <widget class="QWidget" name="processtab">
            <attribute name="title">
             <string>Processing</string>
            </attribute>
-           <layout class="QFormLayout" name="formLayout_3">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>9</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>9</number>
             </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_11">
@@ -347,7 +374,7 @@
           </widget>
          </widget>
         </item>
-        <item>
+        <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
          <widget class="QDialogButtonBox" name="buttonBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -408,8 +435,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>818</width>
-     <height>23</height>
+     <width>754</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -608,8 +635,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="levelGroup"/>
-  <buttongroup name="stepGroup"/>
   <buttongroup name="contourGroup"/>
+  <buttongroup name="stepGroup"/>
+  <buttongroup name="levelGroup"/>
  </buttongroups>
 </ui>
