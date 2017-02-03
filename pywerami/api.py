@@ -9,9 +9,9 @@ http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 
 import numpy as np
 
-class WeramiData(object):
+class GridData(object):
     @classmethod
-    def from_tab(self, filename='luca3_1.tab', xvar=0, yvar=1):
+    def from_tab(self, filename, xvar=0, yvar=1):
         obj = self()
         with open(filename,'r') as f:
             ln = f.readlines()
@@ -45,6 +45,42 @@ class WeramiData(object):
         obj.data = {}
         for col,var in enumerate(obj.dep):
             obj.data[var] = data[:,col]
+
+        try:
+            obj.dep.remove('T(K)')
+            obj.dep.remove('P(bar)')
+        except:
+            pass
+        return obj
+
+    @classmethod
+    def from_tci(self, filename):
+        import scipy.io as sio
+        import ntpath
+        obj = self()
+        tci = sio.loadmat(filename)['pseudodata'][0]
+        opt = {'currentDir', 'workingDir', 'InputData', 'TCversion', 'paths', 'SectionDetails'}
+        dep = sorted(list(set(tci.dtype.names).difference(opt)))
+        obj.version = str(tci['TCversion'][0][0, 0])
+        obj.label = ntpath.basename(tci['paths'][0]['InputFilepath'][0, 0][0])
+        obj.xvar = 0
+        obj.yvar = 1
+        x = tci['SectionDetails'][0][1, 0][0]
+        y = tci['SectionDetails'][0][0, 0][0]
+        vx = dict(name='T(C)', min=x.min(), num=len(x), max=x.max())
+        vy = dict(name='p(kbar)', min=y.min(), num=len(y), max=y.max())
+        obj.ind = [vx, vy]
+        obj.data = {}
+        obj.dep = []
+        for d in dep:
+            if tci[d][0].dtype.names:
+                for p in tci[d][0].dtype.names:
+                    key = d + '-' + p
+                    obj.data[key] = tci[d][0][p][0, 0].flatten(order='C')
+                    obj.dep.append(key)
+            else:
+                obj.data[d] = tci[d][0].flatten(order='C')
+                obj.dep.append(d)
 
         return obj
 

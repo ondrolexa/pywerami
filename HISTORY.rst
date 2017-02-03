@@ -19,3 +19,8 @@ History
 
 * Minimum number of levels is 2
 * For single contour set Minimum and Maximum to same value
+
+0.2.3 (2017-02-03)
+------------------
+* Added support for TCInvestigator tci files
+* fix for selection behaviour when component checked

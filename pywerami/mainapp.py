@@ -29,7 +29,7 @@ from matplotlib.backends.backend_qt5agg import (
 from mpl_toolkits.mplot3d import Axes3D
 
 from .ui_pywerami import Ui_MainWindow
-from .api import WeramiData
+from .api import GridData
 
 class OptionsForm(QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -144,10 +144,14 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def import_data(self, filename=None):
         if not filename:
-            filename = QtWidgets.QFileDialog.getOpenFileName(self, "Import tab file", ".", "TAB (*.tab);;All files (*.*)")[0]
+            filename = QtWidgets.QFileDialog.getOpenFileName(self, "Import data file", ".", "Perple_X Table (*.tab *.TAB);;TCInvestigator (*.tci *.TCI)")[0]
         if filename:
-            self.data = WeramiData.from_tab(filename)
-
+            if filename.lower().endswith('.tab'):
+                self.data = GridData.from_tab(filename)
+            elif filename.lower().endswith('.tci'):
+                self.data = GridData.from_tci(filename)
+            else:
+                raise Exception('Unsupported file format')
             # populate listview and setup properties
             self.props = {}
             self._model = QtGui.QStandardItemModel(self.listView)
@@ -337,8 +341,12 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._ax = self._fig.add_subplot(111, projection='3d')
         self.plot()
 
-    def plot(self):
+    def plot(self, item=None):
         self._ax.cla()
+        if item:
+            index = self._model.createIndex(item.row(), item.column())
+            if index.isValid():
+                self.listView.setCurrentIndex(index)
         if not self.action3D.isChecked():
             extent = self.data.get_extent()
             i = 0
@@ -408,7 +416,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 def process_cl_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename', action='store', nargs='?', default=None, help="Werami tab file")
+    parser.add_argument('filename', action='store', nargs='?', default=None, help="Data file")
 
     parsed_args, unparsed_args = parser.parse_known_args()
     return parsed_args, unparsed_args
