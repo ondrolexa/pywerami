@@ -23,4 +23,5 @@ History
 0.2.3 (2017-02-03)
 ------------------
 * Added support for TCInvestigator tci files
-* fix for selection behaviour when component checked
+* Fix for selection behaviour when component checked
+* Project files implemented

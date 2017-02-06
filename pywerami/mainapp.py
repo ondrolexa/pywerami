@@ -8,6 +8,9 @@ http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 # last edited: April 16, 2014
 
 import sys
+import os
+import pickle
+import gzip
 import argparse
 
 from pkg_resources import resource_filename
@@ -120,6 +123,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionQuit.setIcon(QtGui.QIcon.fromTheme('application-exit'))
         self.actionAbout.setIcon(QtGui.QIcon.fromTheme('help-about'))
 
+        # connect signals
+        self.actionOpen.triggered.connect(self.openProject)
+        self.actionSave.triggered.connect(self.saveProject)
+        self.actionSaveas.triggered.connect(self.saveProjectAs)
         self.actionImport.triggered.connect(self.import_data)
         self.actionHome.triggered.connect(self.mpl_toolbar.home)
         self.actionPan.triggered.connect(self.plotpan)
@@ -129,6 +136,22 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSavefig.triggered.connect(self.mpl_toolbar.save_figure)
         self.actionProperties.triggered.connect(self.edit_options)
         self.actionQuit.triggered.connect(self.close)
+
+        # buttons signals
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.apply_props)
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.RestoreDefaults).clicked.connect(self.restore_props)
+        self.contcolor.clicked.connect(self.contours_color)
+        self.action3D.triggered.connect(self.switch3d)
+        # signals to calculate step size
+        self.levelmin.editingFinished.connect(self.step_from_levels)
+        self.levelmax.editingFinished.connect(self.step_from_levels)
+        self.levelnum.editingFinished.connect(self.step_from_levels)
+        self.setlevels.toggled.connect(self.step_from_levels)
+        # almost done
+        self.ready = False
+        self.changed = False
+        self.project = None
+
         if filename:
             self.import_data(filename)
 
@@ -136,11 +159,22 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Ready", 5000)
 
     def closeEvent(self,event):
-        reply=QtWidgets.QMessageBox.question(self,'Message',"Are you sure to quit?",QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
-        if reply==QtWidgets.QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+        if self.changed:
+            quit_msg = 'Project have been changed. Save ?'
+            qb = QtWidgets.QMessageBox
+            reply = qb.question(self, 'Message', quit_msg,
+                                qb.Cancel | qb.Discard | qb.Save, qb.Save)
+
+            if reply == qb.Save:
+                self.do_save()
+                if self.project is not None:
+                    event.accept()
+                else:
+                    event.ignore()
+            elif reply == qb.Discard:
+                event.accept()
+            else:
+                event.ignore()
 
     def import_data(self, filename=None):
         if not filename:
@@ -153,6 +187,8 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 raise Exception('Unsupported file format')
             # populate listview and setup properties
+            self.datafilename = filename
+            self.ready = True
             self.props = {}
             self._model = QtGui.QStandardItemModel(self.listView)
             for var in self.data.dep:
@@ -163,20 +199,15 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.listView.setModel(self._model)
             self.listView.show()
+
             # connect listview signals
             self.varSel = self.listView.selectionModel()
+            try: elf.varSel.selectionChanged.disconnect() 
+            except Exception: pass
             self.varSel.selectionChanged.connect(self.on_var_changed)
+            try: self._model.itemChanged.disconnect() 
+            except Exception: pass
             self._model.itemChanged.connect(self.plot)
-            # buttons signals
-            self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.apply_props)
-            self.buttonBox.button(QtWidgets.QDialogButtonBox.RestoreDefaults).clicked.connect(self.restore_props)
-            self.contcolor.clicked.connect(self.contours_color)
-            self.action3D.triggered.connect(self.switch3d)
-            # signals to calculate step size
-            self.levelmin.editingFinished.connect(self.step_from_levels)
-            self.levelmax.editingFinished.connect(self.step_from_levels)
-            self.levelnum.editingFinished.connect(self.step_from_levels)
-            self.setlevels.toggled.connect(self.step_from_levels)
 
             # all done focus
             self.action3D.setChecked(False) # no 3d on import
@@ -185,136 +216,226 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plot()
             self.statusbar.showMessage("Data from {} imported".format(self.data.label), 5000)
 
+    def openProject(self, checked, projfile=None):
+        """Open pywerami project
+        """
+        if self.changed:
+            quit_msg = 'Project have been changed. Save ?'
+            qb = QtWidgets.QMessageBox
+            reply = qb.question(self, 'Message', quit_msg,
+                                qb.Discard | qb.Save,
+                                qb.Save)
+
+            if reply == qb.Save:
+                self.do_save()
+        if projfile is None:
+            qd = QtWidgets.QFileDialog
+            filt = 'pywermi project (*.pwp)'
+            projfile = qd.getOpenFileName(self, 'Open project',
+                                          os.path.expanduser('~'),
+                                          filt)[0]
+        if os.path.exists(projfile):
+            stream = gzip.open(projfile, 'rb')
+            data = pickle.load(stream)
+            stream.close()
+            # set actual working dir in case folder was moved
+            self.datafilename = data['datafilename']
+            self.import_data(self.datafilename)
+            self.props = data['props']
+            # all done
+            self.ready = True
+            self.project = projfile
+            self.changed = False
+            # all done focus
+            self.action3D.setChecked(False) # no 3d on import
+            self.varSel.setCurrentIndex(self._model.index(0, 0), QtCore.QItemSelectionModel.ClearAndSelect | QtCore.QItemSelectionModel.Rows)
+            self.listView.setFocus()
+            self.plot()
+            self.statusbar.showMessage("Project loaded.", 5000)
+
+    def saveProject(self):
+        """Save project
+        """
+        if self.ready:
+            if self.project is None:
+                filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save current project',
+                                                                 os.path.dirname(self.datafilename),
+                                                                 'pywerami project (*.pwp)')[0]
+                if filename:
+                    if not filename.lower().endswith('.pwp'):
+                        filename = filename + '.pwp'
+                    self.project = filename
+                    self.do_save()
+            else:
+                self.do_save()
+
+    def saveProjectAs(self):
+        """Save project as
+        """
+        if self.ready:
+            filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save current project as',
+                                                             os.path.dirname(self.datafilename),
+                                                             'pywerami project (*.pwp)')[0]
+            if filename:
+                if not filename.lower().endswith('.pwp'):
+                    filename = filename + '.pwp'
+                self.project = filename
+                self.do_save()
+
+    def do_save(self):
+        """Do saving of poject
+        """
+        if self.project:
+            # put to dict
+            data = {'datafilename': self.datafilename,
+                    'props': self.props}
+            # do save
+            stream = gzip.open(self.project, 'wb')
+            pickle.dump(data, stream)
+            stream.close()
+            self.changed = False
+            self.statusBar().showMessage('Project saved.')
+
+
     def contours_color(self):
-    	col = QtWidgets.QColorDialog.getColor()
-    	if col.isValid():
-            self.contcolor.setStyleSheet("background-color: {}".format(col.name()))
+        if self.ready:
+            col = QtWidgets.QColorDialog.getColor()
+            if col.isValid():
+                self.contcolor.setStyleSheet("background-color: {}".format(col.name()))
 
     def step_from_levels(self):
-        if int(self.levelnum.text()) < 2:
-            self.levelnum.setText('2')
-        if float(self.levelmax.text()) < float(self.levelmin.text()):
-            self.levelmin.setText(self.levelmax.text())
-        if self.setlevels.isChecked():
-            step = (float(self.levelmax.text()) - float(self.levelmin.text())) / (int(self.levelnum.text()) - 1)
-            self.levelstep.setText(repr(step))
-            self.props[self.var]['step'] = step
+        if self.ready:
+            if int(self.levelnum.text()) < 2:
+                self.levelnum.setText('2')
+            if float(self.levelmax.text()) < float(self.levelmin.text()):
+                self.levelmin.setText(self.levelmax.text())
+            if self.setlevels.isChecked():
+                step = (float(self.levelmax.text()) - float(self.levelmin.text())) / (int(self.levelnum.text()) - 1)
+                self.levelstep.setText(repr(step))
+                self.props[self.var]['step'] = step
+                self.changed = True
 
     def default_var_props(self, var):
-        data = self.data.get_var(var)
-        prop = {}
-        #levels
-        prop['min'] = data.min()
-        prop['max'] = data.max()
-        prop['num'] = 10
-        prop['step'] = (prop['max'] - prop['min']) / (prop['num'] - 1)
-        prop['levels'] = 'num'
-        prop['type'] = 'linear'
-        #style
-        prop['fill'] = False
-        prop['opacity'] = 100
-        prop['cmap'] = 'jet'
-        prop['contours'] = 'color'
-        prop['color'] = '#000000'
-        prop['label'] = False
-        #processing
-        prop['resample'] = 1
-        prop['median'] = 1
-        prop['gauss'] = 0
-        prop['clipmin'] = data.min()
-        prop['clipmax'] = data.max()
+        if self.ready:
+            data = self.data.get_var(var)
+            prop = {}
+            #levels
+            prop['min'] = data.min()
+            prop['max'] = data.max()
+            prop['num'] = 10
+            prop['step'] = (prop['max'] - prop['min']) / (prop['num'] - 1)
+            prop['levels'] = 'num'
+            prop['type'] = 'linear'
+            #style
+            prop['fill'] = False
+            prop['opacity'] = 100
+            prop['cmap'] = 'jet'
+            prop['contours'] = 'color'
+            prop['color'] = '#000000'
+            prop['label'] = False
+            #processing
+            prop['resample'] = 1
+            prop['median'] = 1
+            prop['gauss'] = 0
+            prop['clipmin'] = data.min()
+            prop['clipmax'] = data.max()
 
-        self.props[var] = prop
+            self.props[var] = prop
 
     def set_var_props(self, var):
-        #levels
-        self.levelmin.setText(repr(self.props[var]['min']))
-        self.levelmax.setText(repr(self.props[var]['max']))
-        self.levelnum.setText(repr(self.props[var]['num']))
-        self.levelstep.setText(repr(self.props[var]['step']))
-        if self.props[var]['levels'] == 'num':
-            self.setlevels.setChecked(True)
-        else:
-            self.setstep.setChecked(True)
-        if self.props[var]['type'] == 'linear':
-            self.linlevel.setChecked(True)
-        else:
-            self.cdflevel.setChecked(True)
-        #style
-        if self.props[var]['fill']:
-            self.fillstyle.setChecked(True)
-        else:
-            self.fillstyle.setChecked(False)
-        self.opacity.setValue(self.props[var]['opacity'])
-        self.mapstyle.setCurrentIndex(self.cmaps.index(self.props[var]['cmap']))
-        self.contcolor.setStyleSheet("background-color: {}".format(self.props[var]['color']))
-        if self.props[var]['contours'] == 'map':
-            self.contcheckmap.setChecked(True)
-        elif self.props[var]['contours'] == 'color':
-            self.contcheckcolor.setChecked(True)
-        else:
-            self.contchecknone.setChecked(True)
-        if self.props[var]['label']:
-            self.contlabel.setChecked(True)
-        else:
-            self.contlabel.setChecked(False)
-        #processing
-        self.resample.setValue(self.props[var]['resample'])
-        self.filtersize.setValue(self.props[var]['median'])
-        self.filtersigma.setValue(self.props[var]['gauss'])
-        self.clipmin.setText(repr(self.props[var]['clipmin']))
-        self.clipmax.setText(repr(self.props[var]['clipmax']))
+        if self.ready:
+            #levels
+            self.levelmin.setText(repr(self.props[var]['min']))
+            self.levelmax.setText(repr(self.props[var]['max']))
+            self.levelnum.setText(repr(self.props[var]['num']))
+            self.levelstep.setText(repr(self.props[var]['step']))
+            if self.props[var]['levels'] == 'num':
+                self.setlevels.setChecked(True)
+            else:
+                self.setstep.setChecked(True)
+            if self.props[var]['type'] == 'linear':
+                self.linlevel.setChecked(True)
+            else:
+                self.cdflevel.setChecked(True)
+            #style
+            if self.props[var]['fill']:
+                self.fillstyle.setChecked(True)
+            else:
+                self.fillstyle.setChecked(False)
+            self.opacity.setValue(self.props[var]['opacity'])
+            self.mapstyle.setCurrentIndex(self.cmaps.index(self.props[var]['cmap']))
+            self.contcolor.setStyleSheet("background-color: {}".format(self.props[var]['color']))
+            if self.props[var]['contours'] == 'map':
+                self.contcheckmap.setChecked(True)
+            elif self.props[var]['contours'] == 'color':
+                self.contcheckcolor.setChecked(True)
+            else:
+                self.contchecknone.setChecked(True)
+            if self.props[var]['label']:
+                self.contlabel.setChecked(True)
+            else:
+                self.contlabel.setChecked(False)
+            #processing
+            self.resample.setValue(self.props[var]['resample'])
+            self.filtersize.setValue(self.props[var]['median'])
+            self.filtersigma.setValue(self.props[var]['gauss'])
+            self.clipmin.setText(repr(self.props[var]['clipmin']))
+            self.clipmax.setText(repr(self.props[var]['clipmax']))
 
     def on_var_changed(self, selected):
-        self.var = self.data.dep[selected.indexes()[0].row()]
-        self.set_var_props(self.var)
-        if self.action3D.isChecked():
-            self.plot()
+        if self.ready:
+            self.var = self.data.dep[selected.indexes()[0].row()]
+            self.set_var_props(self.var)
+            if self.action3D.isChecked():
+                self.plot()
 
     def apply_props(self):
-        #levels
-        self.props[self.var]['min'] = float(self.levelmin.text())
-        self.props[self.var]['max'] = float(self.levelmax.text())
-        self.props[self.var]['num'] = int(self.levelnum.text())
-        self.props[self.var]['step'] = float(self.levelstep.text())
-        if self.setlevels.isChecked():
-            self.props[self.var]['levels'] = 'num'
-        else:
-            self.props[self.var]['levels'] = 'step'
-        if self.linlevel.isChecked():
-            self.props[self.var]['type'] = 'linear'
-        else:
-            self.props[self.var]['type'] = 'cdf'
-        #style
-        if self.fillstyle.isChecked():
-            self.props[self.var]['fill'] = True
-        else:
-            self.props[self.var]['fill'] = False
-        self.props[self.var]['opacity'] = self.opacity.value()
-        self.props[self.var]['cmap'] = str(self.mapstyle.currentText())
-        self.props[self.var]['color'] = str(self.contcolor.palette().color(1).name())
-        if self.contcheckmap.isChecked():
-            self.props[self.var]['contours'] = 'map'
-        elif self.contcheckcolor.isChecked():
-            self.props[self.var]['contours'] = 'color'
-        else:
-            self.props[self.var]['contours'] = ''
-        if self.contlabel.isChecked():
-            self.props[self.var]['label'] = True
-        else:
-            self.props[self.var]['label'] = False
-        #processing
-        self.props[self.var]['resample'] = self.resample.value()
-        self.props[self.var]['median'] = self.filtersize.value()
-        self.props[self.var]['gauss'] = self.filtersigma.value()
-        self.props[self.var]['clipmin'] = float(self.clipmin.text())
-        self.props[self.var]['clipmax'] = float(self.clipmax.text())
-        self.plot()
+        if self.ready:
+            #levels
+            self.props[self.var]['min'] = float(self.levelmin.text())
+            self.props[self.var]['max'] = float(self.levelmax.text())
+            self.props[self.var]['num'] = int(self.levelnum.text())
+            self.props[self.var]['step'] = float(self.levelstep.text())
+            if self.setlevels.isChecked():
+                self.props[self.var]['levels'] = 'num'
+            else:
+                self.props[self.var]['levels'] = 'step'
+            if self.linlevel.isChecked():
+                self.props[self.var]['type'] = 'linear'
+            else:
+                self.props[self.var]['type'] = 'cdf'
+            #style
+            if self.fillstyle.isChecked():
+                self.props[self.var]['fill'] = True
+            else:
+                self.props[self.var]['fill'] = False
+            self.props[self.var]['opacity'] = self.opacity.value()
+            self.props[self.var]['cmap'] = str(self.mapstyle.currentText())
+            self.props[self.var]['color'] = str(self.contcolor.palette().color(1).name())
+            if self.contcheckmap.isChecked():
+                self.props[self.var]['contours'] = 'map'
+            elif self.contcheckcolor.isChecked():
+                self.props[self.var]['contours'] = 'color'
+            else:
+                self.props[self.var]['contours'] = ''
+            if self.contlabel.isChecked():
+                self.props[self.var]['label'] = True
+            else:
+                self.props[self.var]['label'] = False
+            #processing
+            self.props[self.var]['resample'] = self.resample.value()
+            self.props[self.var]['median'] = self.filtersize.value()
+            self.props[self.var]['gauss'] = self.filtersigma.value()
+            self.props[self.var]['clipmin'] = float(self.clipmin.text())
+            self.props[self.var]['clipmax'] = float(self.clipmax.text())
+            self.changed = True
+            self.plot()
 
     def restore_props(self):
-        self.default_var_props(self.var)
-        self.set_var_props(self.var)
-        self.plot()
+        if self.ready:
+            self.default_var_props(self.var)
+            self.set_var_props(self.var)
+            self.plot()
 
     def edit_options(self):
         dlg = OptionsForm(self)
@@ -333,86 +454,87 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._canvas.draw()
 
     def switch3d(self):
-        if not self.action3D.isChecked():
-            self._fig.clear()
-            self._ax = self._fig.add_subplot(111)
-        else:
-            self._fig.clear()
-            self._ax = self._fig.add_subplot(111, projection='3d')
-        self.plot()
+        if self.ready:
+            if not self.action3D.isChecked():
+                self._fig.clear()
+                self._ax = self._fig.add_subplot(111)
+            else:
+                self._fig.clear()
+                self._ax = self._fig.add_subplot(111, projection='3d')
+            self.plot()
 
     def plot(self, item=None):
-        self._ax.cla()
-        if item:
-            index = self._model.createIndex(item.row(), item.column())
-            if index.isValid():
-                self.listView.setCurrentIndex(index)
-        if not self.action3D.isChecked():
-            extent = self.data.get_extent()
-            i = 0
-            while self._model.item(i):
-                if self._model.item(i).checkState():
-                    CS = None
-                    var = str(self._model.item(i).text())
-                    # get data, smooth and clip
-                    data = self.data.get_var(var,nan=np.float(self.settings.value("nan", "NaN", type=str)))
-                    if self.props[var]['resample'] > 1:
-                        data = np.ma.array(ndimage.zoom(data.filled(0), self.props[var]['resample']), mask=ndimage.zoom(data.mask, self.props[var]['resample'], order=0))
-                    if self.props[var]['median'] > 1:
-                        data = np.ma.array(ndimage.median_filter(data, size=self.props[var]['median']*self.props[var]['resample']), mask=data.mask)
-                    if self.props[var]['gauss'] > 0:
-                        data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[var]['gauss']*self.props[var]['resample']), mask=data.mask)
-                    data = np.ma.masked_outside(data, self.props[var]['clipmin'], self.props[var]['clipmax'])
-                    if self.props[var]['fill']:
-                        self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=cm.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity']/100.0)
-                    if self.props[var]['min'] == self.props[var]['max']:
-                        clevels = np.array([self.props[var]['min']])
-                    else:
-                        if self.props[var]['type'] == 'linear':
-                            if self.props[var]['levels'] == 'num':
-                                clevels = np.linspace(self.props[var]['min'], self.props[var]['max'], self.props[var]['num'])
-                            else:
-                                # trick to include max in levels
-                                clevels = np.arange(self.props[var]['min'], self.props[var]['max'] + 10**np.ceil(np.log10(np.abs(self.props[var]['max']))), self.props[var]['step'])
+        if self.ready:
+            self._ax.cla()
+            if item:
+                index = self._model.createIndex(item.row(), item.column())
+                if index.isValid():
+                    self.listView.setCurrentIndex(index)
+            if not self.action3D.isChecked():
+                extent = self.data.get_extent()
+                i = 0
+                while self._model.item(i):
+                    if self._model.item(i).checkState():
+                        CS = None
+                        var = str(self._model.item(i).text())
+                        # get data, smooth and clip
+                        data = self.data.get_var(var,nan=np.float(self.settings.value("nan", "NaN", type=str)))
+                        if self.props[var]['resample'] > 1:
+                            data = np.ma.array(ndimage.zoom(data.filled(0), self.props[var]['resample']), mask=ndimage.zoom(data.mask, self.props[var]['resample'], order=0))
+                        if self.props[var]['median'] > 1:
+                            data = np.ma.array(ndimage.median_filter(data, size=self.props[var]['median']*self.props[var]['resample']), mask=data.mask)
+                        if self.props[var]['gauss'] > 0:
+                            data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[var]['gauss']*self.props[var]['resample']), mask=data.mask)
+                        data = np.ma.masked_outside(data, self.props[var]['clipmin'], self.props[var]['clipmax'])
+                        if self.props[var]['fill']:
+                            self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=cm.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity']/100.0)
+                        if self.props[var]['min'] == self.props[var]['max']:
+                            clevels = np.array([self.props[var]['min']])
                         else:
-                            # cdf based on histogram binned acording to the Freedman-Diaconis rule
-                            v = np.sort(data.compressed())
-                            IQR = v[int(round((v.size-1) * float(0.75)))] - v[int(round((v.size-1) * float(0.25)))]
-                            bin_size = 2 * IQR * v.size**(-1.0/3)
-                            nbins = int(round(max(self.props[var]['num'], (v[-1]-v[0]) / (bin_size+0.001))))
-                            hist, bin_edges = np.histogram(v, bins=nbins)
-                            cdf = np.cumsum(hist)
-                            cdfx = np.cumsum(np.diff(bin_edges)) + bin_edges[:2].sum()/2
-                            clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
-                    if self.props[var]['contours'] == 'map':
-                        CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, cmap=cm.get_cmap(self.props[var]['cmap']))
-                    elif self.props[var]['contours'] == 'color':
-                        CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, colors=self.props[var]['color'])
-                    if self.props[var]['label'] and CS:
-                        self._ax.clabel(CS, fontsize=8, inline=1)
-                i += 1
+                            if self.props[var]['type'] == 'linear':
+                                if self.props[var]['levels'] == 'num':
+                                    clevels = np.linspace(self.props[var]['min'], self.props[var]['max'], self.props[var]['num'])
+                                else:
+                                    # trick to include max in levels
+                                    clevels = np.arange(self.props[var]['min'], self.props[var]['max'] + 10**np.ceil(np.log10(np.abs(self.props[var]['max']))), self.props[var]['step'])
+                            else:
+                                # cdf based on histogram binned acording to the Freedman-Diaconis rule
+                                v = np.sort(data.compressed())
+                                IQR = v[int(round((v.size-1) * float(0.75)))] - v[int(round((v.size-1) * float(0.25)))]
+                                bin_size = 2 * IQR * v.size**(-1.0/3)
+                                nbins = int(round(max(self.props[var]['num'], (v[-1]-v[0]) / (bin_size+0.001))))
+                                hist, bin_edges = np.histogram(v, bins=nbins)
+                                cdf = np.cumsum(hist)
+                                cdfx = np.cumsum(np.diff(bin_edges)) + bin_edges[:2].sum()/2
+                                clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
+                        if self.props[var]['contours'] == 'map':
+                            CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, cmap=cm.get_cmap(self.props[var]['cmap']))
+                        elif self.props[var]['contours'] == 'color':
+                            CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, colors=self.props[var]['color'])
+                        if self.props[var]['label'] and CS:
+                            self._ax.clabel(CS, fontsize=8, inline=1)
+                    i += 1
 
-            self._ax.axis(extent)
-            self._ax.set_title(self.data.label)
-        else:
-            # get data, smooth and clip
-            data = self.data.get_var(self.var)
-            if self.props[self.var]['resample'] > 1:
-                data = np.ma.array(ndimage.zoom(data.filled(0), self.props[self.var]['resample']), mask=ndimage.zoom(data.mask, self.props[self.var]['resample'], order=0))
-            if self.props[self.var]['median'] > 1:
-                data = np.ma.array(ndimage.median_filter(data, size=self.props[self.var]['median']*self.props[self.var]['resample']), mask=data.mask)
-            if self.props[self.var]['gauss'] > 0:
-                data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[self.var]['gauss']*self.props[self.var]['resample']), mask=data.mask)
-            data = np.ma.masked_outside(data, self.props[self.var]['clipmin'], self.props[self.var]['clipmax'])
-            x,y = np.meshgrid(self.data.get_xrange(self.props[self.var]['resample']), self.data.get_yrange(self.props[self.var]['resample']))
-            self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity']/100.0)
-            self._ax.view_init(azim=235, elev=30)
+                self._ax.axis(extent)
+                self._ax.set_title(self.data.label)
+            else:
+                # get data, smooth and clip
+                data = self.data.get_var(self.var)
+                if self.props[self.var]['resample'] > 1:
+                    data = np.ma.array(ndimage.zoom(data.filled(0), self.props[self.var]['resample']), mask=ndimage.zoom(data.mask, self.props[self.var]['resample'], order=0))
+                if self.props[self.var]['median'] > 1:
+                    data = np.ma.array(ndimage.median_filter(data, size=self.props[self.var]['median']*self.props[self.var]['resample']), mask=data.mask)
+                if self.props[self.var]['gauss'] > 0:
+                    data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[self.var]['gauss']*self.props[self.var]['resample']), mask=data.mask)
+                data = np.ma.masked_outside(data, self.props[self.var]['clipmin'], self.props[self.var]['clipmax'])
+                x,y = np.meshgrid(self.data.get_xrange(self.props[self.var]['resample']), self.data.get_yrange(self.props[self.var]['resample']))
+                self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity']/100.0)
+                self._ax.view_init(azim=235, elev=30)
 
-        self._ax.set_xlabel(self.data.ind[self.data.xvar]['name'])
-        self._ax.set_ylabel(self.data.ind[self.data.yvar]['name'])
-        self._fig.tight_layout()
-        self._canvas.draw()
-
+            self._ax.set_xlabel(self.data.ind[self.data.xvar]['name'])
+            self._ax.set_ylabel(self.data.ind[self.data.yvar]['name'])
+            self._fig.tight_layout()
+            self._canvas.draw()
 
 def process_cl_args():
     parser = argparse.ArgumentParser()

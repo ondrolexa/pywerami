@@ -443,12 +443,11 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionImport"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveas"/>
     <addaction name="actionSavefig"/>
-    <addaction name="separator"/>
-    <addaction name="actionImport"/>
     <addaction name="separator"/>
     <addaction name="actionProperties"/>
     <addaction name="separator"/>
@@ -491,10 +490,10 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionImport"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="actionSaveas"/>
-   <addaction name="actionImport"/>
    <addaction name="separator"/>
    <addaction name="actionHome"/>
    <addaction name="actionPan"/>
@@ -509,7 +508,7 @@
   </widget>
   <action name="actionOpen">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>&amp;Open project</string>
    </property>
    <property name="toolTip">
     <string>Open pywerami project</string>
@@ -517,7 +516,10 @@
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>&amp;Save</string>
+    <string>&amp;Save project</string>
+   </property>
+   <property name="iconText">
+    <string>Save</string>
    </property>
    <property name="toolTip">
     <string>Save pywerami project</string>
@@ -525,10 +527,13 @@
   </action>
   <action name="actionImport">
    <property name="text">
-    <string>&amp;Read tab</string>
+    <string>&amp;New project</string>
+   </property>
+   <property name="iconText">
+    <string>New</string>
    </property>
    <property name="toolTip">
-    <string>Read werami tab file</string>
+    <string>New project from data file</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -541,10 +546,13 @@
   </action>
   <action name="actionSaveas">
    <property name="text">
-    <string>Save as...</string>
+    <string>Save project as...</string>
+   </property>
+   <property name="iconText">
+    <string>Save as</string>
    </property>
    <property name="toolTip">
-    <string>Save as</string>
+    <string>Save pywerami project as</string>
    </property>
   </action>
   <action name="actionProperties">
@@ -589,6 +597,9 @@
    <property name="text">
     <string>Plot properties</string>
    </property>
+   <property name="iconText">
+    <string>Properties</string>
+   </property>
    <property name="toolTip">
     <string>Plot properties</string>
    </property>
@@ -596,6 +607,9 @@
   <action name="actionSavefig">
    <property name="text">
     <string>Export figure...</string>
+   </property>
+   <property name="iconText">
+    <string>Export</string>
    </property>
    <property name="toolTip">
     <string>Export figure</string>
@@ -635,8 +649,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="contourGroup"/>
-  <buttongroup name="stepGroup"/>
   <buttongroup name="levelGroup"/>
+  <buttongroup name="stepGroup"/>
+  <buttongroup name="contourGroup"/>
  </buttongroups>
 </ui>
