@@ -25,3 +25,11 @@ History
 * Added support for TCInvestigator tci files
 * Fix for selection behaviour when component checked
 * Project files implemented
+
+0.2.4 (2017-YY-XX)
+------------------
+* Changed default cmap to viridis
+* Fix of contours min max
+* Default formatter of contour labels changed to general format
+* Added setting to define number of digits for contour levels
+  for nicer formatting

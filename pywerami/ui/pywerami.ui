@@ -185,6 +185,19 @@
               </property>
              </widget>
             </item>
+            <item row="5" column="0">
+             <widget class="QRadioButton" name="contcheckcolor">
+              <property name="text">
+               <string>Single color</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">contourGroup</string>
+              </attribute>
+             </widget>
+            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_2">
               <property name="text">
@@ -205,21 +218,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="fillstyle">
-              <property name="text">
-               <string>Filled contours</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="contlabel">
-              <property name="text">
-               <string>Labeling</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
+            <item row="4" column="0">
              <widget class="QRadioButton" name="contcheckmap">
               <property name="text">
                <string>Colormap</string>
@@ -229,7 +228,7 @@
               </attribute>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="4" column="1">
              <widget class="QRadioButton" name="contchecknone">
               <property name="text">
                <string>None</string>
@@ -239,20 +238,7 @@
               </attribute>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QRadioButton" name="contcheckcolor">
-              <property name="text">
-               <string>Single color</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-              <attribute name="buttonGroup">
-               <string notr="true">contourGroup</string>
-              </attribute>
-             </widget>
-            </item>
-            <item row="4" column="1">
+            <item row="5" column="1">
              <widget class="QPushButton" name="contcolor">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -265,6 +251,33 @@
               </property>
               <property name="text">
                <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="fillstyle">
+              <property name="text">
+               <string>Filled contours</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QCheckBox" name="contlabel">
+              <property name="text">
+               <string>Labeling</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="labelDigits">
+              <property name="prefix">
+               <string>Digits: </string>
+              </property>
+              <property name="maximum">
+               <number>6</number>
+              </property>
+              <property name="value">
+               <number>3</number>
               </property>
              </widget>
             </item>
@@ -649,8 +662,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="levelGroup"/>
   <buttongroup name="stepGroup"/>
+  <buttongroup name="levelGroup"/>
   <buttongroup name="contourGroup"/>
  </buttongroups>
 </ui>

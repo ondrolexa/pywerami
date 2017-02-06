@@ -21,10 +21,13 @@ import numpy as np
 import matplotlib
 from scipy import ndimage
 
+__version__ = '0.2.4devel'
+
 # Make sure that we are using QT5
 matplotlib.use('Qt5Agg')
 
 from matplotlib import cm
+from matplotlib import ticker
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvasQTAgg as FigureCanvas,
@@ -33,47 +36,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from .ui_pywerami import Ui_MainWindow
 from .api import GridData
-
-class OptionsForm(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(OptionsForm, self).__init__(parent)
-        settings = QtCore.QSettings("LX", "pywerami")
-        layout = QtWidgets.QVBoxLayout(self)
-        form = QtWidgets.QWidget()
-        formlayout = QtWidgets.QFormLayout(form)
-
-        ## scale
-        #self.scale = QLineEdit(repr(settings.value("scale", 1, type=float)), self)
-        #self.scale.setValidator(QDoubleValidator(self.scale))
-        #formlayout.addRow('Scale', self.scale)
-
-        # not-a-number
-        self.nan = QtWidgets.QLineEdit(settings.value("nan", "NaN", type=str), self)
-        formlayout.addRow('Not a number', self.nan)
-
-        form.setLayout(formlayout)
-        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
-        layout.addWidget(form)
-        layout.addWidget(buttonBox)
-        self.setLayout(layout)
-
-        buttonBox.accepted.connect(self.check)
-        buttonBox.rejected.connect(self.reject)
-
-        self.setWindowTitle("PyWerami options")
-
-    def check(self):
-        try:
-            np.float(self.nan.text())
-            self.accept()
-        except:
-            QtWidgets.QMessageBox.warning(self, "Warning", "Not a number must be float number or NaN")
-
-    def accept(self):
-        settings = QtCore.QSettings("LX", "pywerami")
-        #settings.setValue("scale", float(self.scale.text()))
-        settings.setValue("nan", self.nan.text())
-        QtWidgets.QDialog.accept(self)
 
 class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
@@ -94,9 +56,19 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setWindowTitle('PyWerami')
         window_icon = resource_filename(__name__, 'images/pywerami.png')
         self.setWindowIcon(QtGui.QIcon(window_icon))
+        self.about_dialog = AboutDialog(__version__)
 
         #set combos
-        self.cmaps = [m for m in cm.datad if not m.endswith("_r")]
+        self.cmaps = ['viridis', 'inferno', 'plasma', 'magma', 'Blues', 'BuGn', 'BuPu',
+                      'GnBu', 'Greens', 'Greys', 'Oranges', 'OrRd', 'PuBu', 'PuBuGn',
+                      'PuRd', 'Purples', 'RdPu', 'Reds', 'YlGn', 'YlGnBu', 'YlOrBr',
+                      'YlOrRd', 'afmhot', 'autumn', 'bone', 'cool', 'copper', 'gist_heat',
+                      'gray', 'hot', 'pink', 'spring', 'summer', 'winter', 'BrBG', 'bwr',
+                      'coolwarm', 'PiYG', 'PRGn', 'PuOr', 'RdBu', 'RdGy', 'RdYlBu',
+                      'RdYlGn', 'Spectral', 'seismic', 'gist_earth', 'terrain', 'ocean',
+                      'gist_stern', 'brg', 'CMRmap', 'cubehelix', 'gnuplot', 'gnuplot2',
+                      'gist_ncar', 'nipy_spectral', 'jet', 'rainbow', 'gist_rainbow',
+                      'hsv', 'flag', 'prism']
         self.mapstyle.addItems(self.cmaps)
 
         # set validators
@@ -136,6 +108,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionSavefig.triggered.connect(self.mpl_toolbar.save_figure)
         self.actionProperties.triggered.connect(self.edit_options)
         self.actionQuit.triggered.connect(self.close)
+        self.actionAbout.triggered.connect(self.about_dialog.exec)
 
         # buttons signals
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Apply).clicked.connect(self.apply_props)
@@ -329,10 +302,11 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #style
             prop['fill'] = False
             prop['opacity'] = 100
-            prop['cmap'] = 'jet'
+            prop['cmap'] = 'viridis'
             prop['contours'] = 'color'
             prop['color'] = '#000000'
             prop['label'] = False
+            prop['digits'] = 3
             #processing
             prop['resample'] = 1
             prop['median'] = 1
@@ -365,6 +339,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.opacity.setValue(self.props[var]['opacity'])
             self.mapstyle.setCurrentIndex(self.cmaps.index(self.props[var]['cmap']))
             self.contcolor.setStyleSheet("background-color: {}".format(self.props[var]['color']))
+            self.labelDigits.setValue(self.props[var]['digits'])
             if self.props[var]['contours'] == 'map':
                 self.contcheckmap.setChecked(True)
             elif self.props[var]['contours'] == 'color':
@@ -412,6 +387,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.props[self.var]['opacity'] = self.opacity.value()
             self.props[self.var]['cmap'] = str(self.mapstyle.currentText())
             self.props[self.var]['color'] = str(self.contcolor.palette().color(1).name())
+            self.props[self.var]['digits'] = self.labelDigits.value()
             if self.contcheckmap.isChecked():
                 self.props[self.var]['contours'] = 'map'
             elif self.contcheckcolor.isChecked():
@@ -496,23 +472,28 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                     clevels = np.linspace(self.props[var]['min'], self.props[var]['max'], self.props[var]['num'])
                                 else:
                                     # trick to include max in levels
-                                    clevels = np.arange(self.props[var]['min'], self.props[var]['max'] + 10**np.ceil(np.log10(np.abs(self.props[var]['max']))), self.props[var]['step'])
+                                    clevels = np.arange(self.props[var]['min'], self.props[var]['max'] + np.finfo(np.float32).eps, self.props[var]['step'])
                             else:
                                 # cdf based on histogram binned acording to the Freedman-Diaconis rule
+                                data = np.ma.masked_outside(data, self.props[var]['min'], self.props[var]['max'])
                                 v = np.sort(data.compressed())
                                 IQR = v[int(round((v.size-1) * float(0.75)))] - v[int(round((v.size-1) * float(0.25)))]
                                 bin_size = 2 * IQR * v.size**(-1.0/3)
-                                nbins = int(round(max(self.props[var]['num'], (v[-1]-v[0]) / (bin_size+0.001))))
+                                nbins = int(round(max(self.props[var]['num'], (v[-1]-v[0]) / (bin_size + 0.001))))
                                 hist, bin_edges = np.histogram(v, bins=nbins)
                                 cdf = np.cumsum(hist)
                                 cdfx = np.cumsum(np.diff(bin_edges)) + bin_edges[:2].sum()/2
-                                clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
+                                #clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num'] + 2)[1:-1], cdf, cdfx)
+                                clevels = np.interp(np.linspace(cdf[0],cdf[-1],self.props[var]['num']), cdf, cdfx)
+                        clevels = np.round(10**self.props[var]['digits']*clevels)/10**self.props[var]['digits']
+                        # Contour levels must be increasing
+                        clevels = np.append(clevels[:1], clevels[1:][np.diff(clevels) > 0])
                         if self.props[var]['contours'] == 'map':
                             CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, cmap=cm.get_cmap(self.props[var]['cmap']))
                         elif self.props[var]['contours'] == 'color':
                             CS = self._ax.contour(self.data.get_xrange(self.props[var]['resample']), self.data.get_yrange(self.props[var]['resample']), data, clevels, colors=self.props[var]['color'])
                         if self.props[var]['label'] and CS:
-                            self._ax.clabel(CS, fontsize=8, inline=1)
+                            self._ax.clabel(CS, fontsize=8, inline=1, fmt='%g')
                     i += 1
 
                 self._ax.axis(extent)
@@ -535,6 +516,79 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._ax.set_ylabel(self.data.ind[self.data.yvar]['name'])
             self._fig.tight_layout()
             self._canvas.draw()
+
+
+class OptionsForm(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(OptionsForm, self).__init__(parent)
+        settings = QtCore.QSettings("LX", "pywerami")
+        layout = QtWidgets.QVBoxLayout(self)
+        form = QtWidgets.QWidget()
+        formlayout = QtWidgets.QFormLayout(form)
+
+        ## scale
+        #self.scale = QLineEdit(repr(settings.value("scale", 1, type=float)), self)
+        #self.scale.setValidator(QDoubleValidator(self.scale))
+        #formlayout.addRow('Scale', self.scale)
+
+        # not-a-number
+        self.nan = QtWidgets.QLineEdit(settings.value("nan", "NaN", type=str), self)
+        formlayout.addRow('Not a number', self.nan)
+
+        form.setLayout(formlayout)
+        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        layout.addWidget(form)
+        layout.addWidget(buttonBox)
+        self.setLayout(layout)
+
+        buttonBox.accepted.connect(self.check)
+        buttonBox.rejected.connect(self.reject)
+
+        self.setWindowTitle("PyWerami options")
+
+    def check(self):
+        try:
+            np.float(self.nan.text())
+            self.accept()
+        except:
+            QtWidgets.QMessageBox.warning(self, "Warning", "Not a number must be float number or NaN")
+
+    def accept(self):
+        settings = QtCore.QSettings("LX", "pywerami")
+        #settings.setValue("scale", float(self.scale.text()))
+        settings.setValue("nan", self.nan.text())
+        QtWidgets.QDialog.accept(self)
+
+
+class AboutDialog(QtWidgets.QDialog):
+    """About dialog
+    """
+    def __init__(self, version, parent=None):
+        """Display a dialog that shows application information."""
+        super(AboutDialog, self).__init__(parent)
+
+        self.setWindowTitle('About')
+        self.resize(300, 100)
+
+        about = QtWidgets.QLabel('PyWerami {}\nstand-alone program to make an countour/3D plot from a contour data'.format(version))
+        about.setAlignment(QtCore.Qt.AlignCenter)
+
+        author = QtWidgets.QLabel('Ondrej Lexa')
+        author.setAlignment(QtCore.Qt.AlignCenter)
+
+        github = QtWidgets.QLabel('GitHub: <a href="https://github.com/ondrolexa/pywerami">ondrolexa</a>')
+        github.setAlignment(QtCore.Qt.AlignCenter)
+        github.setOpenExternalLinks(True)
+
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.setAlignment(QtCore.Qt.AlignVCenter)
+
+        self.layout.addWidget(about)
+        self.layout.addWidget(author)
+        self.layout.addWidget(github)
+
+        self.setLayout(self.layout)
+
 
 def process_cl_args():
     parser = argparse.ArgumentParser()
