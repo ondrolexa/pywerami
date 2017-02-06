@@ -162,6 +162,8 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # populate listview and setup properties
             self.datafilename = filename
             self.ready = True
+            self.project = None
+            self.changed = True
             self.props = {}
             self._model = QtGui.QStandardItemModel(self.listView)
             for var in self.data.dep:
@@ -175,10 +177,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # connect listview signals
             self.varSel = self.listView.selectionModel()
-            try: elf.varSel.selectionChanged.disconnect() 
+            try: elf.varSel.selectionChanged.disconnect()
             except Exception: pass
             self.varSel.selectionChanged.connect(self.on_var_changed)
-            try: self._model.itemChanged.disconnect() 
+            try: self._model.itemChanged.disconnect()
             except Exception: pass
             self._model.itemChanged.connect(self.plot)
 
