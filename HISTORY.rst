@@ -33,3 +33,4 @@ History
 * Default formatter of contour labels changed to general format
 * Added setting to define number of digits for contour levels
   for nicer formatting
+* Fix for duplicates in tab file

@@ -8,6 +8,7 @@ http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 # last edited: April 16, 2014
 
 import numpy as np
+from collections import Counter
 
 class GridData(object):
     @classmethod
@@ -37,13 +38,19 @@ class GridData(object):
 
         nd = int(ln[3+4*ni])  # number of dependent properties
         obj.dep = ln[4+4*ni].split()[:nd]
+        # Check for possible duplicates
+        counts = Counter(obj.dep)
+        for s,num in counts.items():
+            if num > 1:
+                for suffix in range(1, num + 1):
+                    obj.dep[obj.dep.index(s)] = s + str(suffix)
         data = []
         for j in range(5+4*ni,len(ln)):
             data.append(ln[j].split()[:nd])
 
         data = np.array(data, float)
         obj.data = {}
-        for col,var in enumerate(obj.dep):
+        for col, var in enumerate(obj.dep):
             obj.data[var] = data[:,col]
 
         try:
