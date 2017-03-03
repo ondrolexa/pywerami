@@ -2,6 +2,7 @@
 Usage
 ========
 
-To use pywerami in a project::
+To use pywerami, execute provided pywerami script::
 
-    import pywerami
+    pywerami
+

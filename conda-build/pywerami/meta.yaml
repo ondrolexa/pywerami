@@ -6,7 +6,7 @@ package:
 
 source:
   git_url: https://github.com/ondrolexa/pywerami.git
-  git_rev: {{ 'v' + data.get('version') }}
+  git_rev: {{ data.get('version') }}
 
 build:
   entry_points:
@@ -18,18 +18,18 @@ build:
 
 requirements:
   build:
-    - python
+    - python # [py3k]
     - setuptools
     - pyqt >=5
-    - numpy >=1.8
-    - matplotlib >=1.2
+    - numpy
+    - matplotlib
     - scipy
 
   run:
-    - python
+    - python # [py3k]
     - pyqt >=5
-    - numpy >=1.8
-    - matplotlib >=1.2
+    - numpy
+    - matplotlib
     - scipy
 
 test:

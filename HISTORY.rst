@@ -26,7 +26,7 @@ History
 * Fix for selection behaviour when component checked
 * Project files implemented
 
-0.2.4 (2017-YY-XX)
+0.2.4 (2017-03-03)
 ------------------
 * Changed default cmap to viridis
 * Fix of contours min max

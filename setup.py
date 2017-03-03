@@ -9,13 +9,9 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
 
 requirements = [
-    'numpy >= 1.8',
-    'matplotlib >= 1.2',
+    'numpy',
+    'matplotlib',
     'scipy'
-]
-
-test_requirements = [
-    # TODO: put package test requirements here
 ]
 
 setup(
@@ -38,12 +34,11 @@ setup(
     zip_safe=False,
     keywords='pywerami',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3'
-    ],
-    test_suite='tests',
-    tests_require=test_requirements
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Utilities'
+    ]
 )

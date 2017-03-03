@@ -2,11 +2,32 @@
 Installation
 ============
 
-At the command line::
+For Anaconda distribution (for now only Linux64 and Win64 supported) you can install from personal channel::
 
-    $ easy_install pywerami
+    conda install -c ondrolexa pywerami
 
-Or, if you have virtualenvwrapper installed::
+For other platforms install dependencies using conda::
 
-    $ mkvirtualenv pywerami
-    $ pip install pywerami
+    conda install numpy matplotlib scipy pyqt
+
+or by any other mechanism (see `Installing Scientific Packages <https://packaging.python.org/science/>`_).
+
+Than install pywerami directly from github using pip::
+
+    https://github.com/ondrolexa/pywerami/archive/master.zip
+
+For upgrade use::
+
+    pip install --upgrade --upgrade-strategy only-if-needed \
+      https://github.com/ondrolexa/pywerami/archive/master.zip
+          
+
+To install most recent (and likely less stable) development version use::
+
+    https://github.com/ondrolexa/pywerami/archive/develop.zip
+
+
+For upgrade to latest development version use::
+
+    pip install --upgrade --upgrade-strategy only-if-needed \
+      https://github.com/ondrolexa/pywerami/archive/develop.zip
