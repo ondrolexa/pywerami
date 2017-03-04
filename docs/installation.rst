@@ -14,7 +14,7 @@ or by any other mechanism (see `Installing Scientific Packages <https://packagin
 
 Than install pywerami directly from github using pip::
 
-    https://github.com/ondrolexa/pywerami/archive/master.zip
+    pip install https://github.com/ondrolexa/pywerami/archive/master.zip
 
 For upgrade use::
 
@@ -24,7 +24,7 @@ For upgrade use::
 
 To install most recent (and likely less stable) development version use::
 
-    https://github.com/ondrolexa/pywerami/archive/develop.zip
+    pip install https://github.com/ondrolexa/pywerami/archive/develop.zip
 
 
 For upgrade to latest development version use::
