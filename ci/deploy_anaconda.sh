@@ -5,7 +5,7 @@
 set -e
 
 echo "Deploying to Anaconda.org..."
-anaconda -t $CONDA_UPLOAD_TOKEN upload --force $HOME/miniconda/conda-bld/noarch/pywerami-*.tar.bz2
+anaconda -t $CONDA_UPLOAD_TOKEN upload --force $HOME/miniconda3/conda-bld/noarch/pywerami-*.tar.bz2
 echo "Successfully deployed to Anaconda.org."
 
 # Workaround for https://github.com/travis-ci/travis-ci/issues/6522
