@@ -1,31 +1,46 @@
-# Config file for automatic testing at travis-ci.org
-# This file will be regenerated if you run travis_pypi_setup.py
-
 language: python
 
-env:
-  - TOXENV=py35
-  - TOXENV=py34
-  - TOXENV=py33
-  - TOXENV=py27
-  - TOXENV=py26
-  - TOXENV=pypy
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
 
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -U tox
+# Setup miniconda
+before_install:
+    # Get Miniconda from Continuum
+    # Need to source the script to set the PATH variable in this environment
+    # (not the scripts environment)
+    - source ci/install-miniconda.sh
+    - conda update -q conda
+    # Install dependencies
+    - conda install python=$PYTHON pip
+    - conda install conda-build
+    - conda install anaconda-client
+    # Show installed pkg information for postmortem diagnostic
+    - conda list
 
-# command to run tests, e.g. python setup.py test
-script: tox
+# install packages
+install:
+  - deps='numpy matplotlib scipy'
+  - conda create -n pywerami $deps python=$TRAVIS_PYTHON_VERSION
+  - source activate pywerami
+  - conda build --python $TRAVIS_PYTHON_VERSION conda-build/pywerami
 
-# After you create the Github repo and add it to Travis, run the
-# travis_pypi_setup.py script to finish PyPI deployment setup
+script:
+  - conda install pywerami --use-local
+
+after_success:
+  - chmod +x conda-build/deploy_anaconda.sh
+
 deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: ondro
-  password:
-    secure: PLEASE_REPLACE_ME
-  on:
-    tags: true
-    repo: ondrolexa/pywerami
-    condition: $TOXENV == py27
+ # Deploy to Anaconda.org
+  - provider: script
+    script: ci/deploy_anaconda.sh
+    on:
+      tags: true
+    skip_cleanup: true
+
+notifications:
+  email:
+    - lexa.ondrej@gmail.com
+

@@ -9,6 +9,7 @@ source:
   git_rev: {{ data.get('version') }}
 
 build:
+  noarch: python
   entry_points:
     - pywerami=pywerami.mainapp:main
 
@@ -18,7 +19,7 @@ build:
 
 requirements:
   build:
-    - python # [py3k]
+    - python
     - setuptools
     - pyqt >=5
     - numpy
@@ -26,7 +27,7 @@ requirements:
     - scipy
 
   run:
-    - python # [py3k]
+    - python
     - pyqt >=5
     - numpy
     - matplotlib
@@ -45,3 +46,6 @@ about:
   doc_url: https://pywerami.readthedocs.org
   dev_url: https://github.com/ondrolexa/pywerami
 
+extra:
+  maintainers:
+   - Ondrej Lexa <lexa.ondrej@gmail.com>
