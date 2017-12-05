@@ -5,7 +5,7 @@
 set -e
 
 echo "Deploying to Anaconda.org..."
-anaconda -t $CONDA_UPLOAD_TOKEN upload -u ondrolexa ~/conda-bld/**/apsg-*.tar.bz2 --force
+anaconda -t $CONDA_UPLOAD_TOKEN upload ~/conda-bld/**/apsg-*.tar.bz2 --force
 echo "Successfully deployed to Anaconda.org."
 
 # Workaround for https://github.com/travis-ci/travis-ci/issues/6522
