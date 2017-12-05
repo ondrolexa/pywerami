@@ -29,7 +29,7 @@ script:
   - conda install pywerami --use-local
 
 after_success:
-  - chmod +x conda-build/deploy_anaconda.sh
+  - chmod +x ci/deploy_anaconda.sh
 
 deploy:
  # Deploy to Anaconda.org
