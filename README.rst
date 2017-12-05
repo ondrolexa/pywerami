@@ -5,6 +5,9 @@ pywerami
 .. image:: https://badge.fury.io/gh/ondrolexa%2Fpywerami.svg
     :target: https://badge.fury.io/gh/ondrolexa%2Fpywerami
 
+.. image:: https://travis-ci.org/ondrolexa/pywerami.svg?branch=master
+    :target: https://travis-ci.org/ondrolexa/pywerami
+
 .. image:: https://readthedocs.org/projects/pywerami/badge/?version=latest
         :target: https://readthedocs.org/projects/pywerami/?badge=latest
         :alt: Documentation Status

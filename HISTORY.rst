@@ -34,3 +34,7 @@ History
 * Added setting to define number of digits for contour levels
   for nicer formatting
 * Fix for duplicates in tab file
+
+0.2.5 (2017-12-05)
+------------------
+* Deployment fixes

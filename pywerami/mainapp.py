@@ -13,7 +13,7 @@ import pickle
 import gzip
 import argparse
 
-from pkg_resources import resource_filename
+from pkg_resources import resource_filename, get_distribution, DistributionNotFound
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -21,7 +21,19 @@ import numpy as np
 import matplotlib
 from scipy import ndimage
 
-__version__ = '0.2.4devel'
+
+try:
+    _dist = get_distribution('pywerami')
+    # Normalize case for Windows systems
+    dist_loc = os.path.normcase(_dist.location)
+    here = os.path.normcase(__file__)
+    if not here.startswith(os.path.join(dist_loc, 'foobar')):
+        # not installed, but there is another version that *is*
+        raise DistributionNotFound
+except DistributionNotFound:
+    __version__ = 'Not installed version'
+else:
+    __version__ = _dist.version
 
 # Make sure that we are using QT5
 matplotlib.use('Qt5Agg')

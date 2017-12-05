@@ -28,6 +28,7 @@ requirements:
 
   run:
     - python
+    - setuptools
     - pyqt >=5
     - numpy
     - matplotlib

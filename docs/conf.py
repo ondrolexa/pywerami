@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pywerami'
-copyright = u'2015, Ondrej Lexa'
+copyright = u'2015-2017, Ondrej Lexa'
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout

@@ -2,7 +2,7 @@
 Installation
 ============
 
-For Anaconda distribution (for now only Linux64 and Win64 supported) you can install from personal channel::
+For Anaconda distribution you can install from personal channel::
 
     conda install -c ondrolexa pywerami
 
