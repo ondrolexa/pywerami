@@ -1,7 +1,6 @@
 language: python
 
 python:
-  - "2.7"
   - "3.5"
   - "3.6"
 
@@ -13,7 +12,7 @@ before_install:
     - source ci/install-miniconda.sh
     - conda update -q conda
     # Install dependencies
-    - conda install python=$PYTHON pip
+    - conda install python=$TRAVIS_PYTHON_VERSION pip
     - conda install conda-build
     - conda install anaconda-client
     # Show installed pkg information for postmortem diagnostic
