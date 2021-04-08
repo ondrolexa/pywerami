@@ -10,11 +10,12 @@ http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 import numpy as np
 from collections import Counter
 
+
 class GridData(object):
     @classmethod
     def from_tab(self, filename, xvar=0, yvar=1):
         obj = self()
-        with open(filename,'r') as f:
+        with open(filename, 'r') as f:
             ln = f.readlines()
 
         obj.version = ln[0].strip()
@@ -27,36 +28,36 @@ class GridData(object):
         obj.ind = []
 
         for i in range(ni):
-            v={}
-            v['name'] = ln[3 + 4*i].strip()
-            v['min'] = float(ln[4 + 4*i])
-            v['num'] = int(ln[6 + 4*i])
-            v['max'] = v['min'] + float(ln[5 + 4*i]) * (v['num'] - 1)
+            v = {}
+            v['name'] = ln[3 + 4 * i].strip()
+            v['min'] = float(ln[4 + 4 * i])
+            v['num'] = int(ln[6 + 4 * i])
+            v['max'] = v['min'] + float(ln[5 + 4 * i]) * (v['num'] - 1)
             obj.ind.append(v)
         obj.xvar = xvar
         obj.yvar = yvar
 
-        nd = int(ln[3+4*ni])  # number of dependent properties
-        obj.dep = ln[4+4*ni].split()[:nd]
+        nd = int(ln[3 + 4 * ni])  # number of dependent properties
+        obj.dep = ln[4 + 4 * ni].split()[:nd]
         # Check for possible duplicates
         counts = Counter(obj.dep)
-        for s,num in counts.items():
+        for s, num in counts.items():
             if num > 1:
                 for suffix in range(1, num + 1):
                     obj.dep[obj.dep.index(s)] = s + str(suffix)
         data = []
-        for j in range(5+4*ni,len(ln)):
+        for j in range(5 + 4 * ni, len(ln)):
             data.append(ln[j].split()[:nd])
 
         data = np.array(data, float)
         obj.data = {}
         for col, var in enumerate(obj.dep):
-            obj.data[var] = data[:,col]
+            obj.data[var] = data[:, col]
 
         try:
             obj.dep.remove('T(K)')
             obj.dep.remove('P(bar)')
-        except:
+        except Exception:
             pass
         return obj
 
@@ -92,10 +93,10 @@ class GridData(object):
         return obj
 
     def get_xrange(self, divider=1):
-        return np.linspace(self.ind[self.xvar]['min'], self.ind[self.xvar]['max'], divider*self.ind[self.xvar]['num'])
+        return np.linspace(self.ind[self.xvar]['min'], self.ind[self.xvar]['max'], divider * self.ind[self.xvar]['num'])
 
     def get_yrange(self, divider=1):
-        return np.linspace(self.ind[self.yvar]['min'], self.ind[self.yvar]['max'], divider*self.ind[self.yvar]['num'])
+        return np.linspace(self.ind[self.yvar]['min'], self.ind[self.yvar]['max'], divider * self.ind[self.yvar]['num'])
 
     def get_extent(self):
         return self.ind[self.xvar]['min'], self.ind[self.xvar]['max'], self.ind[self.yvar]['min'], self.ind[self.yvar]['max']
@@ -104,6 +105,4 @@ class GridData(object):
         if np.isnan(nan):
             return np.ma.array(self.data[var], mask=np.isnan(self.data[var])).reshape(self.ind[self.yvar]['num'], self.ind[self.xvar]['num'], order='C')
         else:
-            return np.ma.array(self.data[var], mask=self.data[var]==nan).reshape(self.ind[self.yvar]['num'], self.ind[self.xvar]['num'], order='C')
-
-
+            return np.ma.array(self.data[var], mask=self.data[var] == nan).reshape(self.ind[self.yvar]['num'], self.ind[self.xvar]['num'], order='C')

@@ -15,4 +15,3 @@ class TestPywerami:
 
     def test_000_something(self):
         pass
-
