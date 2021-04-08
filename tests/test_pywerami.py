@@ -8,23 +8,11 @@ test_pywerami
 Tests for `pywerami` module.
 """
 
-import unittest
-
-from pywerami import pywerami
+from pywerami import mainapp
 
 
-class TestPywerami(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class TestPywerami:
 
     def test_000_something(self):
         pass
 
-
-if __name__ == '__main__':
-    import sys
-    sys.exit(unittest.main())

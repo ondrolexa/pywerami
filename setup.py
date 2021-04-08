@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+from os import path
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
+CURRENT_PATH = path.abspath(path.dirname(__file__))
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read().replace('.. :changelog:', '')
+with open(path.join(CURRENT_PATH, "README.md")) as file:
+    readme = file.read()
 
-requirements = [
-    'numpy',
-    'matplotlib',
-    'scipy'
-]
+with open(path.join(CURRENT_PATH, "HISTORY.md")) as file:
+    history = file.read()
+
 
 setup(
     name='pywerami',
@@ -25,12 +24,12 @@ setup(
     packages=find_packages(),
     package_data={'pywerami.images': ['*.png'],
                   'pywerami.samples': ['*.tab']},
-    install_requires=requirements,
+    install_requires=["numpy", "matplotlib", "scipy"],
     entry_points="""
     [console_scripts]
     pywerami=pywerami.mainapp:main
     """,
-    license="BSD",
+    license="MIT",
     zip_safe=False,
     keywords='pywerami',
     classifiers=[
@@ -40,5 +39,10 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Scientific/Engineering',
         'Topic :: Utilities'
-    ]
+    ],
+    project_urls={
+        'Documentation': 'https://pywerami.readthedocs.io/',
+        'Source Code': 'https://github.com/ondrolexa/pywerami/',
+        'Bug Tracker': 'https://github.com/ondrolexa/pywerami/issues/',
+    }
 )

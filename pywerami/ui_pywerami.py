@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pywerami.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -154,6 +154,9 @@ class Ui_MainWindow(object):
         self.labelDigits.setProperty("value", 3)
         self.labelDigits.setObjectName("labelDigits")
         self.gridLayout_2.addWidget(self.labelDigits, 3, 1, 1, 1)
+        self.checkCBar = QtWidgets.QCheckBox(self.styletab)
+        self.checkCBar.setObjectName("checkCBar")
+        self.gridLayout_2.addWidget(self.checkCBar, 2, 1, 1, 1)
         self.tabWidget.addTab(self.styletab, "")
         self.processtab = QtWidgets.QWidget()
         self.processtab.setObjectName("processtab")
@@ -223,7 +226,6 @@ class Ui_MainWindow(object):
         self.widget.setMinimumSize(QtCore.QSize(400, 0))
         self.widget.setObjectName("widget")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.widget)
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.matplot = QtWidgets.QVBoxLayout()
         self.matplot.setSpacing(0)
@@ -234,7 +236,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setEnabled(True)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 754, 19))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 754, 20))
         self.menubar.setObjectName("menubar")
         self.menu_File = QtWidgets.QMenu(self.menubar)
         self.menu_File.setObjectName("menu_File")
@@ -338,6 +340,7 @@ class Ui_MainWindow(object):
         self.fillstyle.setText(_translate("MainWindow", "Filled contours"))
         self.contlabel.setText(_translate("MainWindow", "Labeling"))
         self.labelDigits.setPrefix(_translate("MainWindow", "Digits: "))
+        self.checkCBar.setText(_translate("MainWindow", "Colorbar"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.styletab), _translate("MainWindow", "Style"))
         self.label_11.setText(_translate("MainWindow", "Resampling grid"))
         self.label_7.setText(_translate("MainWindow", "Median filter size"))
