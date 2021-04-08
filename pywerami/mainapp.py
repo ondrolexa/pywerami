@@ -318,6 +318,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             prop['type'] = 'linear'
             # style
             prop['fill'] = False
+            prop['cbar'] = False
             prop['opacity'] = 100
             prop['cmap'] = 'viridis'
             prop['contours'] = 'color'
@@ -353,6 +354,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.fillstyle.setChecked(True)
             else:
                 self.fillstyle.setChecked(False)
+            if self.props[var].get('cbar', False):
+                self.checkCBar.setChecked(True)
+            else:
+                self.checkCBar.setChecked(False)
             self.opacity.setValue(self.props[var]['opacity'])
             self.mapstyle.setCurrentIndex(self.cmaps.index(self.props[var]['cmap']))
             self.contcolor.setStyleSheet("background-color: {}".format(self.props[var]['color']))
@@ -401,6 +406,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.props[self.var]['fill'] = True
             else:
                 self.props[self.var]['fill'] = False
+            if self.checkCBar.isChecked():
+                self.props[self.var]['cbar'] = True
+            else:
+                self.props[self.var]['cbar'] = False
             self.props[self.var]['opacity'] = self.opacity.value()
             self.props[self.var]['cmap'] = str(self.mapstyle.currentText())
             self.props[self.var]['color'] = str(self.contcolor.palette().color(1).name())
@@ -448,17 +457,16 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def switch3d(self):
         if self.ready:
+            self.plot()
+
+    def plot(self, item=None):
+        if self.ready:
             if not self.action3D.isChecked():
                 self._fig.clear()
                 self._ax = self._fig.add_subplot(111)
             else:
                 self._fig.clear()
                 self._ax = self._fig.add_subplot(111, projection='3d')
-            self.plot()
-
-    def plot(self, item=None):
-        if self.ready:
-            self._ax.cla()
             if item:
                 index = self._model.createIndex(item.row(), item.column())
                 if index.isValid():
@@ -480,7 +488,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[var]['gauss'] * self.props[var]['resample']), mask=data.mask)
                         data = np.ma.masked_outside(data, self.props[var]['clipmin'], self.props[var]['clipmax'])
                         if self.props[var]['fill']:
-                            self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=cm.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity'] / 100.0)
+                            img = self._ax.imshow(data, interpolation='none', origin='lower', extent=extent, aspect='auto', cmap=cm.get_cmap(self.props[var]['cmap']), alpha=self.props[var]['opacity'] / 100.0)
+                            if self.props[var]['cbar']:
+                                cbar = self._fig.colorbar(img)
+                                cbar.ax.set_ylabel(var)
                         if self.props[var]['min'] == self.props[var]['max']:
                             clevels = np.array([self.props[var]['min']])
                         else:
@@ -526,8 +537,11 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[self.var]['gauss'] * self.props[self.var]['resample']), mask=data.mask)
                 data = np.ma.masked_outside(data, self.props[self.var]['clipmin'], self.props[self.var]['clipmax'])
                 x, y = np.meshgrid(self.data.get_xrange(self.props[self.var]['resample']), self.data.get_yrange(self.props[self.var]['resample']))
-                self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity'] / 100.0)
+                img = self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity'] / 100.0)
                 self._ax.view_init(azim=235, elev=30)
+                if self.props[self.var]['cbar']:
+                    cbar = self._fig.colorbar(img)
+                    cbar.ax.set_ylabel(self.var)
 
             self._ax.set_xlabel(self.data.ind[self.data.xvar]['name'])
             self._ax.set_ylabel(self.data.ind[self.data.yvar]['name'])
