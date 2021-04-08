@@ -1,7 +1,4 @@
 name: pywerami
-channels:
-  - ondrolexa
-  - defaults
 dependencies:
   - python=3
   - pyqt=5
