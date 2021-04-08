@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     package_data={'pywerami.images': ['*.png'],
                   'pywerami.samples': ['*.tab']},
-    install_requires=["numpy", "matplotlib", "scipy"],
+    install_requires=["PyQt5", "numpy", "matplotlib", "scipy"],
     entry_points="""
     [console_scripts]
     pywerami=pywerami.mainapp:main
