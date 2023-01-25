@@ -16,14 +16,19 @@ You need Python 3.6 or later to run pywerami. The package requires [NumPy](https
 
 ## Quick start
 
-pywerami can be installed using pip:
+latest release of pywerami can be installed using pip:
 ```
 pip install pywerami
 ```
-If you want tu run the latest version of code, you can install it from git:
+If you want tu run the latest version of code, you can install it directly from git:
 ```
 pip install git+git://github.com/ondrolexa/pywerami.git
 ```
+or 
+```
+pip install https://github.com/ondrolexa/pywerami/archive/master.zip
+```
+
 Alternatively, you can download the package manually from the GitHub repository [https://github.com/ondrolexa/pywerami](https://github.com/ondrolexa/pywerami), unzip it, navigate into the package, and use the command:
 ```
 python setup.py install
@@ -46,6 +51,7 @@ Also, I would appreciate it if you could report any issues that occur when using
 
 * Free software: GPLv3 license
 * Documentation: https://pywerami.readthedocs.org.
+
 ## Documentation
 
 Explore the full features of APSG. You can find detailed documentation [here](https://pywerami.readthedocs.org).
