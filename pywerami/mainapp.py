@@ -479,7 +479,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         CS = None
                         var = str(self._model.item(i).text())
                         # get data, smooth and clip
-                        data = self.data.get_var(var, nan=np.float(self.settings.value("nan", "NaN", type=str)))
+                        data = self.data.get_var(var, nan=float(self.settings.value("nan", "NaN", type=str)))
                         if self.props[var]['resample'] > 1:
                             data = np.ma.array(ndimage.zoom(data.filled(0), self.props[var]['resample']), mask=ndimage.zoom(data.mask, self.props[var]['resample'], order=0))
                         if self.props[var]['median'] > 1:
@@ -505,6 +505,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 # cdf based on histogram binned acording to the Freedman-Diaconis rule
                                 data = np.ma.masked_outside(data, self.props[var]['min'], self.props[var]['max'])
                                 v = np.sort(data.compressed())
+                                v = v[np.invert(np.isnan(v))]
                                 IQR = v[int(round((v.size - 1) * float(0.75)))] - v[int(round((v.size - 1) * float(0.25)))]
                                 bin_size = 2 * IQR * v.size**(-1.0 / 3)
                                 nbins = int(round(max(self.props[var]['num'], (v[-1] - v[0]) / (bin_size + 0.001))))
@@ -579,7 +580,7 @@ class OptionsForm(QtWidgets.QDialog):
 
     def check(self):
         try:
-            np.float(self.nan.text())
+            float(self.nan.text())
             self.accept()
         except Exception:
             QtWidgets.QMessageBox.warning(self, "Warning", "Not a number must be float number or NaN")
