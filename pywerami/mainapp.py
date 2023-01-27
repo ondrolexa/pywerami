@@ -166,9 +166,9 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             filename = QtWidgets.QFileDialog.getOpenFileName(self, "Import data file", ".", "Perple_X Table (*.tab *.TAB);;TCInvestigator (*.tci *.TCI)")[0]
         if filename:
             if filename.lower().endswith('.tab'):
-                self.data = GridData.from_tab(filename)
+                self.data = GridData.from_tab(filename, degrees=self.settings.value("degrees", False, type=bool))
             elif filename.lower().endswith('.tci'):
-                self.data = GridData.from_tci(filename)
+                self.data = GridData.from_tci(filename, degrees=self.settings.value("degrees", False, type=bool))
             else:
                 raise Exception('Unsupported file format')
             # populate listview and setup properties
@@ -565,7 +565,11 @@ class OptionsForm(QtWidgets.QDialog):
 
         # not-a-number
         self.nan = QtWidgets.QLineEdit(settings.value("nan", "NaN", type=str), self)
+        self.degrees = QtWidgets.QCheckBox("Temperature in degrees")
+        if settings.value("degrees", False, type=bool):
+            self.degrees.setChecked(True)
         formlayout.addRow('Not a number', self.nan)
+        formlayout.addRow(self.degrees)
 
         form.setLayout(formlayout)
         buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
@@ -589,6 +593,7 @@ class OptionsForm(QtWidgets.QDialog):
         settings = QtCore.QSettings("LX", "pywerami")
         # settings.setValue("scale", float(self.scale.text()))
         settings.setValue("nan", self.nan.text())
+        settings.setValue("degrees", self.degrees.isChecked())
         QtWidgets.QDialog.accept(self)
 
 
