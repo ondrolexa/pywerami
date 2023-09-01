@@ -1,5 +1,9 @@
 # History
 
+### 0.2.7 (2023-09-01)
+
+* Option to change T(K) and T(C) added
+
 ### 0.2.6 (2021-04-08)
 
 * Added colorbar option
