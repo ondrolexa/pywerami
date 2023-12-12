@@ -43,7 +43,7 @@ Please note that the dependencies (Matplotlib, NumPy and SciPy) will also be upg
 
 ## Documentation
 
-Explore the full features of APSG. You can find detailed documentation [here](https://pywerami.readthedocs.org).
+You can find detailed documentation [here](https://pywerami.readthedocs.org).
 
 ## Contributing
 

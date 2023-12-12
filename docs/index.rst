@@ -3,25 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pywerami's documentation!
-======================================
+.. toctree::
+   :hidden:
 
-Contents:
+   self
+
+.. mdinclude:: ../README.md
+
 
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
-   readme
-   installation
    usage
-   contributing
    authors
    history
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
