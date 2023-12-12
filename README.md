@@ -14,7 +14,7 @@ TCInvestigator.
 
 You need Python 3.6 or later to run pywerami. The package requires [NumPy](https://numpy.org/) and [SciPy](https://www.scipy.org/), and the plotting routines require [Matplotlib](https://matplotlib.org/).
 
-## Quick start
+## Installation
 
 latest release of pywerami can be installed using pip:
 ```
@@ -22,7 +22,7 @@ pip install pywerami
 ```
 If you want tu run the latest version of code, you can install it directly from git:
 ```
-pip install git+git://github.com/ondrolexa/pywerami.git
+pip install git+https://github.com/ondrolexa/pywerami.git
 ```
 or 
 ```
@@ -31,7 +31,7 @@ pip install https://github.com/ondrolexa/pywerami/archive/master.zip
 
 Alternatively, you can download the package manually from the GitHub repository [https://github.com/ondrolexa/pywerami](https://github.com/ondrolexa/pywerami), unzip it, navigate into the package, and use the command:
 ```
-python setup.py install
+pip install .
 ```
 #### Upgrading via pip
 
@@ -40,17 +40,6 @@ To upgrade an existing version of APSG from PyPI, execute
 pip install pywerami --upgrade --no-deps
 ```
 Please note that the dependencies (Matplotlib, NumPy and SciPy) will also be upgraded if you omit the `--no-deps` flag; use the `--no-deps` ("no dependencies") flag if you don't want this.
-
-#### Installing pywerami from the source distribution
-
-In rare cases, users reported problems on certain systems with the default pip installation command, which installs pywerami from the binary distribution ("wheels") on PyPI. If you should encounter similar problems, you could try to install pywerami from the source distribution instead via
-```
-pip install --no-binary :all: pywerami
-```
-Also, I would appreciate it if you could report any issues that occur when using `pip install pywerami` in hope that we can fix these in future releases.
-
-* Free software: GPLv3 license
-* Documentation: https://pywerami.readthedocs.org.
 
 ## Documentation
 
