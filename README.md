@@ -39,10 +39,6 @@ conda install -n base conda-libmamba-solver
 conda config --set solver libmamba
 ```
 
-```
-Any subsequent `mamba` commands in the docs will need to be replaced with `conda` if you choose to use your existing Anaconda installation.
-```
-
 Otherwise, to install Mamba:
 
 **On Windows**, just click through the installation steps.
@@ -111,7 +107,7 @@ Although you do not need Mambaforge installed to perform a `pip install`, we rec
 
 ### Using `pip` from source
 
-1. Download zip source from [Releases page](https://github.com/ondrolexa/pywerami/releases) or download [master version](https://github.com/ondrolexa/pywerami/archive/refs/heads/master.zip). Unzip the folder, open terminal and change directory to unzipped folder. 
+1. Download zip source from [Releases page](https://github.com/ondrolexa/pywerami/releases) or download [master version](https://github.com/ondrolexa/pywerami/archive/refs/heads/master.zip). Unzip the folder, open terminal and change directory to unzipped folder.
 
 2. Create separate environment with all requirements:
 
