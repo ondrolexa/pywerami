@@ -113,7 +113,7 @@ class GridData:
     def get_extent(self):
         return self.ind[self.xvar]['min'], self.ind[self.xvar]['max'], self.ind[self.yvar]['min'], self.ind[self.yvar]['max']
 
-    def get_var(self, var, nan=np.NaN):
+    def get_var(self, var, nan=np.nan):
         if np.isnan(nan):
             return np.ma.array(self.data[var], mask=np.isnan(self.data[var])).reshape(self.ind[self.yvar]['num'], self.ind[self.xvar]['num'], order='C')
         else:

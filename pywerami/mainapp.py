@@ -13,7 +13,8 @@ import pickle
 import gzip
 import argparse
 
-from pkg_resources import resource_filename, get_distribution, DistributionNotFound
+import importlib.resources as ires
+import importlib.metadata as imeta
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -33,17 +34,9 @@ from .ui_pywerami import Ui_MainWindow
 from .api import GridData
 
 try:
-    _dist = get_distribution('pywerami')
-    # Normalize case for Windows systems
-    dist_loc = os.path.normcase(_dist.location)
-    here = os.path.normcase(__file__)
-    if not here.startswith(os.path.join(dist_loc, 'foobar')):
-        # not installed, but there is another version that *is*
-        raise DistributionNotFound
-except DistributionNotFound:
-    __version__ = 'Not installed version'
-else:
-    __version__ = _dist.version
+    __version__ = imeta.version("pywerami")
+except imeta.PackageNotFoundError:
+    __version__ = "unknown"
 
 # Make sure that we are using QT5
 matplotlib.use('Qt5Agg')
@@ -66,7 +59,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.mpl_toolbar.hide()
         self.matplot.addWidget(self.mpl_toolbar)
         self.setWindowTitle('PyWerami')
-        window_icon = resource_filename(__name__, 'images/pywerami.png')
+        window_icon = str(ires.files("pywerami").joinpath("images/pywerami.png"))
         self.setWindowIcon(QtGui.QIcon(window_icon))
         self.about_dialog = AboutDialog(__version__)
 
@@ -95,7 +88,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionOpen.setIcon(QtGui.QIcon.fromTheme('document-open'))
         self.actionSave.setIcon(QtGui.QIcon.fromTheme('document-save'))
         self.actionSaveas.setIcon(QtGui.QIcon.fromTheme('document-save-as'))
-        self.actionImport.setIcon(QtGui.QIcon.fromTheme('x-office-spreadsheet'))
+        self.actionImport.setIcon(QtGui.QIcon.fromTheme('document-new'))
         self.actionHome.setIcon(self.mpl_toolbar._icon('home.png'))
         self.actionPan.setIcon(self.mpl_toolbar._icon('move.png'))
         self.actionZoom.setIcon(self.mpl_toolbar._icon('zoom_to_rect.png'))
@@ -301,7 +294,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.levelmin.setText(self.levelmax.text())
             if self.setlevels.isChecked():
                 step = (float(self.levelmax.text()) - float(self.levelmin.text())) / (int(self.levelnum.text()) - 1)
-                self.levelstep.setText(repr(step))
+                self.levelstep.setText(str(step))
                 self.props[self.var]['step'] = step
                 self.changed = True
 
@@ -337,10 +330,10 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def set_var_props(self, var):
         if self.ready:
             # levels
-            self.levelmin.setText(repr(self.props[var]['min']))
-            self.levelmax.setText(repr(self.props[var]['max']))
-            self.levelnum.setText(repr(self.props[var]['num']))
-            self.levelstep.setText(repr(self.props[var]['step']))
+            self.levelmin.setText(str(self.props[var]['min']))
+            self.levelmax.setText(str(self.props[var]['max']))
+            self.levelnum.setText(str(self.props[var]['num']))
+            self.levelstep.setText(str(self.props[var]['step']))
             if self.props[var]['levels'] == 'num':
                 self.setlevels.setChecked(True)
             else:
@@ -376,8 +369,8 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.resample.setValue(self.props[var]['resample'])
             self.filtersize.setValue(self.props[var]['median'])
             self.filtersigma.setValue(self.props[var]['gauss'])
-            self.clipmin.setText(repr(self.props[var]['clipmin']))
-            self.clipmax.setText(repr(self.props[var]['clipmax']))
+            self.clipmin.setText(str(self.props[var]['clipmin']))
+            self.clipmax.setText(str(self.props[var]['clipmax']))
 
     def on_var_changed(self, selected):
         if self.ready:
@@ -538,7 +531,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     data = np.ma.array(ndimage.gaussian_filter(data, sigma=self.props[self.var]['gauss'] * self.props[self.var]['resample']), mask=data.mask)
                 data = np.ma.masked_outside(data, self.props[self.var]['clipmin'], self.props[self.var]['clipmax'])
                 x, y = np.meshgrid(self.data.get_xrange(self.props[self.var]['resample']), self.data.get_yrange(self.props[self.var]['resample']))
-                img = self._ax.plot_surface(x, y, data.filled(np.NaN), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity'] / 100.0)
+                img = self._ax.plot_surface(x, y, data.filled(np.nan), vmin=data.min(), vmax=data.max(), cmap=cm.get_cmap(self.props[self.var]['cmap']), linewidth=0.5, alpha=self.props[self.var]['opacity'] / 100.0)
                 self._ax.view_init(azim=235, elev=30)
                 if self.props[self.var]['cbar']:
                     cbar = self._fig.colorbar(img)
@@ -559,7 +552,7 @@ class OptionsForm(QtWidgets.QDialog):
         formlayout = QtWidgets.QFormLayout(form)
 
         # scale
-        # self.scale = QLineEdit(repr(settings.value("scale", 1, type=float)), self)
+        # self.scale = QLineEdit(str(settings.value("scale", 1, type=float)), self)
         # self.scale.setValidator(QDoubleValidator(self.scale))
         # formlayout.addRow('Scale', self.scale)
 
