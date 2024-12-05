@@ -3,7 +3,7 @@
 ### 0.2.8 (2024-12-05)
 
 * NumPy>=2.0 compatibility fix
-* pkg_resources depreceation fix
+* pkg_resources depreciation fix
 
 ### 0.2.7 (2023-09-01)
 
