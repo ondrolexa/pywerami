@@ -1,7 +1,7 @@
 name: pywerami
 dependencies:
-  - python=3
-  - pyqt=5
-  - numpy
-  - matplotlib
-  - scipy
+    - python>=3.10
+    - pyqt=5
+    - numpy
+    - matplotlib
+    - scipy
