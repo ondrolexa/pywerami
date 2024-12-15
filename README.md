@@ -14,7 +14,10 @@ TCInvestigator.
 
 pywerami can be installed as a Python package on Windows, Linux, Mac OS X, and Mac OS Apple Silicon.
 
-You need Python 3.6 or later to run pywerami. The package requires [NumPy](https://numpy.org/) and [SciPy](https://www.scipy.org/), and the plotting routines require [Matplotlib](https://matplotlib.org/), so we **strongly** recommend using [Miniforge](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) to install it in its own isolated environment.
+You need Python 3.10 or later to run pywerami. The package requires [NumPy](https://numpy.org/)
+and [SciPy](https://www.scipy.org/), and the plotting routines require [Matplotlib](https://matplotlib.org/),
+so we **strongly** recommend using [Miniforge](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
+to install it in its own isolated environment.
 
 The newest version of pywerami can always be found in the [Releases page](https://github.com/ondrolexa/pywerami/releases).
 
@@ -86,7 +89,7 @@ Although you do not need Mambaforge installed to perform a `pip install`, we rec
 1. Create the environment to isolate the `pip install` from other environments on your computer:
 
    ```bash
-   mamba create -y -n pywerami python=3 pyqt=5 numpy matplotlib scipy
+   mamba create -y -n pywerami python<=3.10 pyqt=5 numpy matplotlib scipy
    ```
 
 2. Activate the environment:
