@@ -89,7 +89,7 @@ Although you do not need Mambaforge installed to perform a `pip install`, we rec
 1. Create the environment to isolate the `pip install` from other environments on your computer:
 
    ```bash
-   mamba create -y -n pywerami python pyqt5 numpy matplotlib scipy
+   mamba create -y -n pywerami python>=3.10 pyqt=5 numpy matplotlib scipy
    ```
 
 2. Activate the environment:
