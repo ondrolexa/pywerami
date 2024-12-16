@@ -27,11 +27,8 @@ from matplotlib import cm
 
 # from matplotlib import ticker
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import (
-    FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavigationToolbar,
-)
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.backends.backend_qtagg import FigureCanvas
+from matplotlib.backends.backend_qt import NavigationToolbar2QT as NavigationToolbar
 
 from .ui_pywerami import Ui_MainWindow
 from .api import GridData
