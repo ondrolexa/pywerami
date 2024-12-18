@@ -21,7 +21,16 @@ dependencies = ["numpy", "matplotlib", "pyqt5", "scipy"]
 
 [project.optional-dependencies]
 docs = ["sphinx", "sphinx_mdinclude", "sphinx_rtd_theme"]
-dev = ["pytest", "pytest-cov", "black"]
+tests = ["pytest"]
+dev = [
+    "pytest",
+    "sphinx",
+    "sphinx_mdinclude",
+    "sphinx_rtd_theme",
+    "pytest",
+    "pytest-cov",
+    "black",
+]
 
 [project.urls]
 Homepage = "https://github.com/ondrolexa/pywerami"
