@@ -12,151 +12,64 @@ TCInvestigator.
 
 ## Installation
 
-pywerami can be installed as a Python package on Windows, Linux, Mac OS X, and Mac OS Apple Silicon.
-
 You need Python 3.10 or later to run pywerami. The package requires [NumPy](https://numpy.org/)
-and [SciPy](https://www.scipy.org/), and the plotting routines require [Matplotlib](https://matplotlib.org/),
-so we **strongly** recommend using [Miniforge](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
-to install it in its own isolated environment.
+and [SciPy](https://www.scipy.org/), and the plotting routines require [Matplotlib](https://matplotlib.org/).
 
-The newest version of pywerami can always be found in the [Releases page](https://github.com/ondrolexa/pywerami/releases).
+It is suggested to install pywerami to isolated environment.
 
-Installation requires entering commands in a terminal. To open one:
-
-   **Windows:** Open the *Start menu* and search for the *Miniforge Prompt* (if using Miniforge) or the *Command Prompt* if not.
-
-   **Linux:** Launch a new terminal by pressing <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd>.
-
-   **Mac:** Launch a new terminal by pressing <kbd>Cmd</kbd> + <kbd>Space</kbd> and searching for _Terminal_.
-
-
-## Installing Miniforge
-
-**Miniforge** is the minimal installers for [Conda](https://conda.io/) and [Mamba](https://github.com/mamba-org/mamba) specific to [conda-forge](https://conda-forge.org/), with the pre-configured conda-forge channel as the default (and only) channel.
-
-If you already have Anaconda on your computer, then you can set the solver to `libmamba` in the `base` environment (and skip the Miniforge installation):
-
+### Create a Virtual Environment
+Open any terminal and run below command:
 ```bash
-conda update -n base conda
-conda install -n base conda-libmamba-solver
-conda config --set solver libmamba
+python -m venv venv
+```
+Activate the virtual environment. For Linux based OS or macOS:
+```bash
+source venv/bin/activate
 ```
 
-Otherwise, to install Mamba:
-
-**On Windows**, just click through the installation steps.
-
-1.  Go to: https://github.com/conda-forge/miniforge#download
-2.  Download the latest version for your OS.
-3.  Follow the installer instructions.
-
-We recommend using the following settings:
-
-- Install for: All Users (requires admin privileges)
-- Destination folder: e.g. `C:\mambaforge`, do not use folders with space character on the path like `C:\Program Files\mambaforge` or containing special national characters.
-
-**On Linux**, it might be easier to do this straight from the terminal (<kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd>) with this one-liner:
-
+For Windows with cmd:
 ```bash
-wget -nc https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh && bash Mambaforge-Linux-x86_64.sh -b && ~/mambaforge/bin/conda init bash
+.\venv\Scripts\activate.bat
 ```
 
-Restart the terminal after running this command.
-
-For other Linux architectures (arm64 and POWER8/9), replace the `.sh` filenames above with the correct installer name for your architecture. See the Download column in [this table](https://github.com/conda-forge/miniforge#mambaforge) for the correct filename.
-
-
-**On Macs (pre-M1)**, you can run the installer using this terminal command:
-
+For Windows with Power shell:
 ```bash
-wget -nc https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-x86_64.sh && bash Miniforge3-MacOSX-x86_64.sh -b && ~/mambaforge/bin/conda init zsh
+.\venv\Scripts\activate.ps1
 ```
 
-**On Macs (Apple Silicon)**, use this terminal command:
-
+To install astropy from PyPI, use:
 ```bash
-curl -fsSL --compressed https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh -o Miniforge3-MacOSX-arm64.sh && chmod +x Miniforge3-MacOSX-arm64.sh && ./Miniforge3-MacOSX-arm64.sh -b -p ~/mambaforge && rm Miniforge3-MacOSX-arm64.sh && ~/mambaforge/bin/conda init "$(basename "${SHELL}")" && source "$HOME/.$(basename "${SHELL}")rc"
+pip install pywerami
 ```
 
-## Installation methods
+### Using conda/mamba
+For  (virtualenv or conda)
+Another recommended way is to use [Miniforge](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html),
+the minimal installers for [Conda](https://conda.io/) and [Mamba](https://github.com/mamba-org/mamba) specific to
+[conda-forge](https://conda-forge.org/), with the pre-configured conda-forge channel as the default (and only) channel.
 
-pywerami could be installed using pip two different ways:
-
-### Using `pip` package
-
-Although you do not need Mambaforge installed to perform a `pip install`, we recommend {ref}`installing Mambaforge<mambaforge>` to create a new environment where we can isolate the `pip install`. Alternatively, you can use a venv if you have an existing python installation.
-
-1. Create the environment to isolate the `pip install` from other environments on your computer:
-
-   ```bash
-   mamba create -y -n pywerami python>=3.10 pyqt=5 numpy matplotlib scipy
+To create own isolated environment, open Miniforge terminal and run.
+```bash
+mamba create -y -n pywerami python>=3.10 pyqt=5 numpy matplotlib scipy
    ```
 
-2. Activate the environment:
-
-   ```bash
-   mamba activate pywerami
-   ```
-
-   Refrain from installing anything into the `base` environment. Always create a new environment to install new packages.
-
-3. Finally, we can perform the `pip install`:
-
-   ```bash
-   pip install pywerami
-   ```
-
-   This is the **recommended installation method**.
-
-### Using `pip` from source
-
-1. Download zip source from [Releases page](https://github.com/ondrolexa/pywerami/releases) or download [master version](https://github.com/ondrolexa/pywerami/archive/refs/heads/master.zip). Unzip the folder, open terminal and change directory to unzipped folder.
-
-2. Create separate environment with all requirements:
-
-   ```bash
-   mamba env create -f environment.yml
-   ```
-
-3. Finally, we can perform the `pip install`:
-
-   ```bash
-   pip install .
-   ```
-
-   This is the **recommended method for development**.
-
-## Testing that things are working
-
-If you installed using `mamba`, first activate the `pywerami` environment by opening a terminal and typing:
-
+Activate the environment:
 ```bash
 mamba activate pywerami
 ```
 
-Not sure what `mamba` environments you already installed? You can get a list of the environments on your system with:
-
+and install pywerami:
 ```bash
-mamba env list
+pip install pywerami
 ```
 
-to start pywerami, simply type:
+To start pywerami, simply type:
 
 ```bash
 pywerami
 ```
 
-### Upgrading and uninstalling
-
-We **strongly recommend** installing pywerami in a fresh environment when updating. This is because dependency versions might change, and depending on the state of your previous environment, directly updating might break compatibility with some of them.
-
-To uninstall an existing environment named `sleap`:
-
-```bash
-mamba env remove -n pywerami
-```
-
-Once the environment has been removed, you are free to install pywerami using any of the installation methods above into an environment of the same name.
+Do not forget that virtuakl environment must be activated prior running `pywerami`.
 
 ## Getting help
 
