@@ -17,7 +17,7 @@ import argparse
 import importlib.resources as ires
 import importlib.metadata as imeta
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from qtpy import QtCore, QtGui, QtWidgets
 
 import numpy as np
 import matplotlib
@@ -489,9 +489,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.props[self.var]["cbar"] = False
             self.props[self.var]["opacity"] = self.opacity.value()
             self.props[self.var]["cmap"] = str(self.mapstyle.currentText())
-            self.props[self.var]["color"] = str(
-                self.contcolor.palette().color(1).name()
-            )
+            self.props[self.var]["color"] = self.contcolor.styleSheet().split()[1]
             self.props[self.var]["digits"] = self.labelDigits.value()
             if self.contcheckmap.isChecked():
                 self.props[self.var]["contours"] = "map"
@@ -520,7 +518,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def edit_options(self):
         dlg = OptionsForm(self)
-        dlg.exec_()
+        dlg.exec()
 
     def plotpan(self):
         self.actionZoom.setChecked(False)
@@ -554,7 +552,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 extent = self.data.get_extent()
                 i = 0
                 while self._model.item(i):
-                    if self._model.item(i).checkState():
+                    if self._model.item(i).checkState() == QtCore.Qt.CheckState.Checked:
                         CS = None
                         var = str(self._model.item(i).text())
                         # get data, smooth and clip
@@ -846,7 +844,7 @@ def main():
     app = QtWidgets.QApplication(unparsed_args)
     MainWindow = PyWeramiWindow(parsed_args.filename)
     MainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

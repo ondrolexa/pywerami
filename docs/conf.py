@@ -42,27 +42,27 @@ project_root = os.path.dirname(cwd)
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'sphinx_mdinclude',
-    'sphinx_rtd_theme'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx_mdinclude",
+    "sphinx_rtd_theme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'pywerami'
-copyright = u'2015-2024, Ondrej Lexa'
+project = "pywerami"
+copyright = "2015-2024, Ondrej Lexa"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -83,7 +83,7 @@ version = importlib.metadata.version("pywerami")
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ["_build"]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -101,7 +101,7 @@ exclude_patterns = ['_build']
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -115,11 +115,11 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+# on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
-#if on_rtd:
+# if on_rtd:
 #    html_theme = 'default'
-#else:
+# else:
 #    html_theme = 'alabaster'
 
 html_theme = "sphinx_rtd_theme"
@@ -153,7 +153,7 @@ html_theme = "sphinx_rtd_theme"
 # here, relative to this directory. They are copied after the builtin
 # static files, so a file named "default.css" will overwrite the builtin
 # "default.css".
-#html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
@@ -199,7 +199,7 @@ html_show_sourcelink = False
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pyweramidoc'
+htmlhelp_basename = "pyweramidoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -207,10 +207,8 @@ htmlhelp_basename = 'pyweramidoc'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     # 'preamble': '',
 }
@@ -219,9 +217,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ('index', 'pywerami.tex',
-     u'pywerami Documentation',
-     u'Ondrej Lexa', 'manual'),
+    ("index", "pywerami.tex", "pywerami Documentation", "Ondrej Lexa", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at
@@ -249,11 +245,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'pywerami',
-     u'pywerami Documentation',
-     [u'Ondrej Lexa'], 1)
-]
+man_pages = [("index", "pywerami", "pywerami Documentation", ["Ondrej Lexa"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -265,12 +257,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'pywerami',
-     u'pywerami Documentation',
-     u'Ondrej Lexa',
-     'pywerami',
-     'One line description of project.',
-     'Miscellaneous'),
+    (
+        "index",
+        "pywerami",
+        "pywerami Documentation",
+        "Ondrej Lexa",
+        "pywerami",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 # Documents to append as an appendix to all manuals.
