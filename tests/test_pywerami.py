@@ -8,10 +8,9 @@ test_pywerami
 Tests for `pywerami` module.
 """
 
-from pywerami import mainapp
+from pywerami.api import GridData
 
 
-class TestPywerami:
-
-    def test_000_something(self):
-        pass
+def test_read_grid():
+    GridData.from_tab("./pywerami/samples/luca3_1.tab", degrees=False)
+    assert True, "Data reading error"

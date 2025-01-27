@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.3.0 (2025-01-27)
+
+* Support both PyQt5 and PyQt6 using qtpy
+
 ### 0.2.9 (2024-12-05)
 
 * updated packaging
@@ -50,4 +54,3 @@
 ## 0.1 (2015-01-11)
 
 * First release on PyPI
-
