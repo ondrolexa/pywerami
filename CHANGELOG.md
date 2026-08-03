@@ -1,5 +1,9 @@
 # Changelog
 
+### 0.4.0 (2026-08-03)
+
+* Compatibility with latest matplotlib fixed
+
 ### 0.3.0 (2025-01-27)
 
 * Support both PyQt5 and PyQt6 using qtpy

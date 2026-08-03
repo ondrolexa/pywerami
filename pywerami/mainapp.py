@@ -4,10 +4,6 @@ by the Perple_X program WERAMI, for data file format see:
 http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 """
 
-# author: Ondrej Lexa
-# website: petrol.natur.cuni.cz/~ondro
-# last edited: April 16, 2014
-
 import sys
 import os
 import pickle
@@ -22,8 +18,6 @@ from qtpy import QtCore, QtGui, QtWidgets
 import numpy as np
 import matplotlib
 from scipy import ndimage
-
-from matplotlib import cm
 
 # from matplotlib import ticker
 from matplotlib.figure import Figure
@@ -536,14 +530,36 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.ready:
             self.plot()
 
+    def _new_axes(self, projection=None):
+        self._fig.clear()
+        return self._fig.add_subplot(111, projection=projection)
+
+    def _process_var(self, var, data):
+        prop = self.props[var]
+        if prop["resample"] > 1:
+            filled = np.where(np.isnan(data.filled(0)), 0, data.filled(0))
+            data = np.ma.array(
+                ndimage.zoom(filled, prop["resample"]),
+                mask=ndimage.zoom(data.mask, prop["resample"], order=0),
+            )
+        if prop["median"] > 1:
+            data = np.ma.array(
+                ndimage.median_filter(data, size=prop["median"] * prop["resample"]),
+                mask=data.mask,
+            )
+        if prop["gauss"] > 0:
+            data = np.ma.array(
+                ndimage.gaussian_filter(data, sigma=prop["gauss"] * prop["resample"]),
+                mask=data.mask,
+            )
+        return np.ma.masked_outside(data, prop["clipmin"], prop["clipmax"])
+
     def plot(self, item=None):
         if self.ready:
             if not self.action3D.isChecked():
-                self._fig.clear()
-                self._ax = self._fig.add_subplot(111)
+                self._ax = self._new_axes()
             else:
-                self._fig.clear()
-                self._ax = self._fig.add_subplot(111, projection="3d")
+                self._ax = self._new_axes(projection="3d")
             if item:
                 index = self._model.createIndex(item.row(), item.column())
                 if index.isValid():
@@ -559,36 +575,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         data = self.data.get_var(
                             var, nan=float(self.settings.value("nan", "NaN", type=str))
                         )
-                        if self.props[var]["resample"] > 1:
-                            data = np.ma.array(
-                                ndimage.zoom(
-                                    data.filled(0), self.props[var]["resample"]
-                                ),
-                                mask=ndimage.zoom(
-                                    data.mask, self.props[var]["resample"], order=0
-                                ),
-                            )
-                        if self.props[var]["median"] > 1:
-                            data = np.ma.array(
-                                ndimage.median_filter(
-                                    data,
-                                    size=self.props[var]["median"]
-                                    * self.props[var]["resample"],
-                                ),
-                                mask=data.mask,
-                            )
-                        if self.props[var]["gauss"] > 0:
-                            data = np.ma.array(
-                                ndimage.gaussian_filter(
-                                    data,
-                                    sigma=self.props[var]["gauss"]
-                                    * self.props[var]["resample"],
-                                ),
-                                mask=data.mask,
-                            )
-                        data = np.ma.masked_outside(
-                            data, self.props[var]["clipmin"], self.props[var]["clipmax"]
-                        )
+                        data = self._process_var(var, data)
                         if self.props[var]["fill"]:
                             img = self._ax.imshow(
                                 data,
@@ -596,7 +583,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 origin="lower",
                                 extent=extent,
                                 aspect="auto",
-                                cmap=cm.get_cmap(self.props[var]["cmap"]),
+                                cmap=matplotlib.colormaps[self.props[var]["cmap"]],
                                 alpha=self.props[var]["opacity"] / 100.0,
                             )
                             if self.props[var]["cbar"]:
@@ -668,7 +655,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 self.data.get_yrange(self.props[var]["resample"]),
                                 data,
                                 clevels,
-                                cmap=cm.get_cmap(self.props[var]["cmap"]),
+                                cmap=matplotlib.colormaps[self.props[var]["cmap"]],
                             )
                         elif self.props[var]["contours"] == "color":
                             CS = self._ax.contour(
@@ -687,36 +674,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             else:
                 # get data, smooth and clip
                 data = self.data.get_var(self.var)
-                if self.props[self.var]["resample"] > 1:
-                    data = np.ma.array(
-                        ndimage.zoom(data.filled(0), self.props[self.var]["resample"]),
-                        mask=ndimage.zoom(
-                            data.mask, self.props[self.var]["resample"], order=0
-                        ),
-                    )
-                if self.props[self.var]["median"] > 1:
-                    data = np.ma.array(
-                        ndimage.median_filter(
-                            data,
-                            size=self.props[self.var]["median"]
-                            * self.props[self.var]["resample"],
-                        ),
-                        mask=data.mask,
-                    )
-                if self.props[self.var]["gauss"] > 0:
-                    data = np.ma.array(
-                        ndimage.gaussian_filter(
-                            data,
-                            sigma=self.props[self.var]["gauss"]
-                            * self.props[self.var]["resample"],
-                        ),
-                        mask=data.mask,
-                    )
-                data = np.ma.masked_outside(
-                    data,
-                    self.props[self.var]["clipmin"],
-                    self.props[self.var]["clipmax"],
-                )
+                data = self._process_var(self.var, data)
                 x, y = np.meshgrid(
                     self.data.get_xrange(self.props[self.var]["resample"]),
                     self.data.get_yrange(self.props[self.var]["resample"]),
@@ -727,7 +685,7 @@ class PyWeramiWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     data.filled(np.nan),
                     vmin=data.min(),
                     vmax=data.max(),
-                    cmap=cm.get_cmap(self.props[self.var]["cmap"]),
+                    cmap=matplotlib.colormaps[self.props[self.var]["cmap"]],
                     linewidth=0.5,
                     alpha=self.props[self.var]["opacity"] / 100.0,
                 )

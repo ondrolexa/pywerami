@@ -4,10 +4,6 @@ by the Perple_X program WERAMI, for data file format see:
 http://www.perplex.ethz.ch/faq/Perple_X_tab_file_format.txt
 """
 
-# author: Ondrej Lexa
-# website: petrol.natur.cuni.cz/~ondro
-# last edited: April 16, 2014
-
 import numpy as np
 from collections import Counter
 
@@ -75,9 +71,14 @@ class GridData:
     @classmethod
     def from_tci(cls, filename, degrees=True):
         import scipy.io as sio
-        import ntpath
 
         tci = sio.loadmat(filename)["pseudodata"][0]
+        return cls._parse_tci(tci, degrees)
+
+    @classmethod
+    def _parse_tci(cls, tci, degrees=True):
+        import ntpath
+
         opt = {
             "currentDir",
             "workingDir",
@@ -86,7 +87,7 @@ class GridData:
             "paths",
             "SectionDetails",
         }
-        dep = sorted(list(set(tci.dtype.names).difference(opt)))
+        fields = sorted(set(tci.dtype.names).difference(opt))
         version = str(tci["TCversion"][0][0, 0])
         label = ntpath.basename(tci["paths"][0]["InputFilepath"][0, 0][0])
         xvar = 0
@@ -103,7 +104,7 @@ class GridData:
         ind = [vx, vy]
         data = {}
         dep = []
-        for d in dep:
+        for d in fields:
             if tci[d][0].dtype.names:
                 for p in tci[d][0].dtype.names:
                     key = d + "-" + p
@@ -139,10 +140,9 @@ class GridData:
 
     def get_var(self, var, nan=np.nan):
         if np.isnan(nan):
-            return np.ma.array(self.data[var], mask=np.isnan(self.data[var])).reshape(
-                self.ind[self.yvar]["num"], self.ind[self.xvar]["num"], order="C"
-            )
+            mask = np.isnan(self.data[var])
         else:
-            return np.ma.array(self.data[var], mask=self.data[var] == nan).reshape(
-                self.ind[self.yvar]["num"], self.ind[self.xvar]["num"], order="C"
-            )
+            mask = (self.data[var] == nan) | np.isnan(self.data[var])
+        return np.ma.array(self.data[var], mask=mask).reshape(
+            self.ind[self.yvar]["num"], self.ind[self.xvar]["num"], order="C"
+        )
